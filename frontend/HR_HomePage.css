@@ -1,6 +1,14 @@
 /* Reset */
-* { margin: 0; padding: 0; box-sizing: border-box; }
+ *{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Added Sans-Serif */
+}
 
+
+
+/* Navbar */
 /* Navbar */
 .navbar {
   display: flex;
@@ -13,7 +21,37 @@
   top: 0;
   z-index: 1000;
 }
-.logo { font-size: 1.5rem; font-weight: bold; letter-spacing: 1px; }
+
+/* Logo Section */
+.navbar .logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.navbar .logo img {
+  width: 115px;
+  height: 59px;
+  object-fit: contain;
+}
+.navbar .logo span {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+/* Profile Section */
+.navbar .profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.navbar .profile img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #fff;
+}
+
 .nav-links { list-style: none; display: flex; gap: 25px; }
 .nav-links li a { color: white; text-decoration: none; font-weight: 500; transition: color 0.3s; }
 .nav-links li a:hover, .nav-links li a.active { color: #d0e8ff; border-bottom: 2px solid #d0e8ff; padding-bottom: 2px; }

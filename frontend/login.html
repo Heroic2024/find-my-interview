@@ -7,20 +7,27 @@
   <link rel="stylesheet" href="auth.css">
   <script>
     window.onload = () => {
-      const params = new URLSearchParams(window.location.search);
-      const role = params.get("role") || "candidate";
-      document.getElementById("roleTitle").innerText =
-        role === "hr" ? "👔 HR Login" : "👩‍💻 Candidate Login";
-      document.getElementById("signupLink").href =
-        `signup.html?role=${role}`;
+  const params = new URLSearchParams(window.location.search);
+  const role = params.get("role") || "candidate";
 
-      // Handle form submit
-      document.getElementById("loginForm").addEventListener("submit", function(e) {
-        e.preventDefault(); // stop refresh
-        // 👉 Here you could check credentials with backend
-        window.location.href = "home.html"; // redirect to home page
-      });
-    };
+  // Update login page title dynamically
+  document.getElementById("roleTitle").innerText =
+    role === "hr" ? "👔 HR Login" : "👩‍💻 Candidate Login";
+
+  // Update signup link with role
+  document.getElementById("signupLink").href = `signup.html?role=${role}`;
+
+  // Handle form submit
+  document.getElementById("loginForm").addEventListener("submit", function (e) {
+    e.preventDefault(); // prevent page refresh
+
+    if (role === "hr") {
+      window.location.href = "HR_HomePage.html"; // HR homepage
+    } else {
+      window.location.href = "candidate_landing_page.html"; // Candidate homepage
+    }
+  });
+};
   </script>
 </head>
 <body class="gradient-bg">
