@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interviewer Home</title>
+  <link rel="stylesheet" href="HR_HomePage.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="logo">TalentSphere</div>
+    <ul class="nav-links">
+      <li><a href="HR_HomePage.html" class="active">Home</a></li>
+      <li><a href="Profile.html">HR Profile</a></li>
+      <li><a href="Registration.html">Candidate Registration</a></li>
+      <li><a href="HR Feedback Report.html">Feedback Report</a></li>
+    </ul>
+  </nav>
+
+  <!-- Hero Section -->
+  <header class="hero">
+    <h1>Welcome, Interviewer</h1>
+    <p>Shaping the future of talent recruitment with precision and care.</p>
+    <a href="Registration.html" class="cta-btn">Register New Candidate</a>
+  </header>
+
+  <!-- Quick Stats Section -->
+  <section class="stats">
+    <div class="stat-card">
+      <h2>120</h2>
+      <p>Total Candidates</p>
+    </div>
+    <div class="stat-card">
+      <h2>8</h2>
+      <p>Pending Interviews</p>
+    </div>
+    <div class="stat-card">
+      <h2>95</h2>
+      <p>Feedbacks Submitted</p>
+    </div>
+  </section>
+
+  <!-- Company Info Section -->
+  <section class="cards">
+    <div class="card">
+      <h2>Our Mission</h2>
+      <p>To connect the right talent with the right opportunities while building a culture of excellence and innovation.</p>
+    </div>
+    <div class="card">
+      <h2>Our Values</h2>
+      <p>Integrity, inclusivity, and impact. We believe in shaping careers while fostering growth and trust.</p>
+    </div>
+    <div class="card">
+      <h2>Work Culture</h2>
+      <p>Collaborative, transparent, and future-driven. We ensure an environment where ideas flourish and people thrive.</p>
+    </div>
+  </section>
+
+  <!-- Upcoming Interviews -->
+  <section class="upcoming">
+    <h2>Upcoming Interviews</h2>
+    <table>
+      <tr>
+        <th>Candidate</th>
+        <th>Position</th>
+        <th>Date</th>
+        <th>Status</th>
+      </tr>
+      <tr>
+        <td>John Doe</td>
+        <td>Software Engineer</td>
+        <td>12 Sept 2025</td>
+        <td>Scheduled</td>
+      </tr>
+      <tr>
+        <td>Jane Smith</td>
+        <td>Data Analyst</td>
+        <td>13 Sept 2025</td>
+        <td>Scheduled</td>
+      </tr>
+      <tr>
+        <td>Michael Lee</td>
+        <td>Product Manager</td>
+        <td>14 Sept 2025</td>
+        <td>Pending</td>
+      </tr>
+    </table>
+  </section>
+
+  <!-- Analytics Section -->
+  <section class="analytics">
+    <h2>HR Analytics</h2>
+    <div class="charts-grid">
+      <div class="chart-card">
+        <h3>Applications per Job Role</h3>
+        <canvas id="applicationsChart"></canvas>
+      </div>
+      <div class="chart-card">
+        <h3>Interview Success Rate</h3>
+        <canvas id="successRateChart"></canvas>
+      </div>
+      <div class="chart-card">
+        <h3>Average Time-to-Hire (Days)</h3>
+        <canvas id="timeToHireChart"></canvas>
+      </div>
+    </div>
+  </section>
+
+  <!-- Announcements Section -->
+  <section class="announcements">
+    <h2>HR Announcements</h2>
+    <ul>
+      <li>📢 New hiring drive starting next month for AI roles.</li>
+      <li>📢 Feedback submission deadline for Q3 is 20th Sept.</li>
+      <li>📢 HR training workshop scheduled for 25th Sept.</li>
+    </ul>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <p>© 2025 TalentSphere HR Systems | Contact: hr@talentsphere.com</p>
+    <div class="socials">
+      <a href="#">LinkedIn</a> | 
+      <a href="#">Twitter</a> | 
+      <a href="#">Careers</a>
+    </div>
+  </footer>
+
+  <!-- ChartJS Scripts -->
+  <script>
+    const applicationsChart = new Chart(document.getElementById("applicationsChart"), {
+      type: "bar",
+      data: {
+        labels: ["Software Engineer", "Data Analyst", "Product Manager"],
+        datasets: [{
+          label: "Applications",
+          data: [40, 25, 55],
+          backgroundColor: ["#4a90e2", "#50c878", "#f4a261"]
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: false },
+          title: { display: false }
+        },
+        scales: {
+          y: { beginAtZero: true }
+        }
+      }
+    });
+
+    const successRateChart = new Chart(document.getElementById("successRateChart"), {
+      type: "pie",
+      data: {
+        labels: ["Passed", "Failed"],
+        datasets: [{
+          data: [65, 35],
+          backgroundColor: ["#50c878", "#e63946"]
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { position: 'bottom' }
+        }
+      }
+    });
+
+    const timeToHireChart = new Chart(document.getElementById("timeToHireChart"), {
+      type: "line",
+      data: {
+        labels: ["Jan", "Feb", "Mar", "Apr", "May"],
+        datasets: [{
+          label: "Days to Hire",
+          data: [30, 28, 25, 27, 24],
+          borderColor: "#4a90e2",
+          backgroundColor: "#4a90e2",
+          fill: false,
+          tension: 0.3,
+          pointRadius: 4
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { beginAtZero: true }
+        }
+      }
+    });
+  </script>
+
+</body>
+</html>

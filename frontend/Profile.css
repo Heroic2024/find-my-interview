@@ -1,0 +1,103 @@
+/* General Layout */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #e6f2ff, #f4f9ff);
+    margin: 0;
+    padding: 20px;
+    color: #1a3d6d;
+  }
+  
+  .container {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 30px;
+    max-width: 1200px;
+    margin: auto;
+    align-items: start;
+  }
+  
+  /* Profile Card */
+  .profile-card {
+    background: #ffffff;
+    border: 2px solid #d0e4ff;
+    border-radius: 14px;
+    padding: 25px 20px;
+    text-align: center;
+    box-shadow: 0px 6px 14px rgba(0, 50, 100, 0.12);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  
+  .profile-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0px 10px 18px rgba(0, 50, 100, 0.18);
+  }
+  
+  .profile-photo {
+    width: 130px;
+    height: 130px;
+    border-radius: 50%;
+    border: 4px solid #4a90e2;
+    margin-bottom: 15px;
+    box-shadow: 0px 3px 6px rgba(0, 50, 100, 0.15);
+  }
+  
+  .profile-card h2 {
+    margin: 10px 0 5px;
+    font-size: 1.6rem;
+    color: #123c74;
+  }
+  
+  .profile-card h4 {
+    margin: 0 0 15px;
+    font-weight: normal;
+    font-size: 1.1rem;
+    color: #357ab8;
+  }
+  
+  .profile-info {
+    text-align: left;
+    margin-top: 15px;
+    line-height: 1.6;
+    font-size: 0.95rem;
+  }
+  
+  .profile-info strong {
+    color: #123c74;
+  }
+  
+  .profile-info a {
+    color: #1a73e8;
+    text-decoration: none;
+    font-weight: bold;
+  }
+  
+  .profile-info a:hover {
+    text-decoration: underline;
+  }
+  
+  /* Calendar */
+  .calendar-container {
+    background: #ffffff;
+    border: 2px solid #d0e4ff;
+    border-radius: 14px;
+    padding: 20px;
+    box-shadow: 0px 6px 14px rgba(0, 50, 100, 0.12);
+  }
+  
+  .calendar-container h2 {
+    margin-bottom: 20px;
+    text-align: center;
+    color: #123c74;
+    font-size: 1.4rem;
+    border-bottom: 2px solid #d0e4ff;
+    padding-bottom: 10px;
+  }
+  
+  /* Ensure calendar always has height */
+  #calendar {
+    max-width: 100%;
+    margin: auto;
+    min-height: 500px;
+    font-size: 0.9rem;
+  }
+  
