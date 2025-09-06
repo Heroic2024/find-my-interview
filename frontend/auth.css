@@ -1,105 +1,149 @@
-/* ===== General Layout ===== */
-body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: linear-gradient(135deg, #408ae4);
-  margin: 0;
-  padding: 0;
+/* Background */
+.gradient-bg {
+  background: linear-gradient(135deg, #408ae4, #042670);
+  min-height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
+  font-family: "Segoe UI", sans-serif;
+  margin: 0;
 }
 
-/* ===== Auth Card ===== */
-.auth-container {
-  width: 380px;
+/* Role Selection */
+.role-container {
   background: #fff;
-  padding: 40px 30px;
-  border-radius: 14px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-  animation: fadeIn 0.6s ease-in-out;
-}
-
-h1 {
+  padding: 50px;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
   text-align: center;
-  margin-bottom: 25px;
-  color: #0D47A1;
-  font-size: 1.8rem;
-  letter-spacing: 1px;
+  width: 420px;
+  animation: fadeIn 0.8s ease;
 }
 
-/* ===== Form Elements ===== */
+.role-card h1 {
+  color: #0D47A1;
+  margin-bottom: 8px;
+  font-size: 1.8rem;
+}
+
+.role-card .subtitle {
+  color: #666;
+  margin-bottom: 25px;
+}
+
+.role-options {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+}
+
+.role-btn {
+  flex: 1;
+  padding: 16px;
+  text-decoration: none;
+  color: white;
+  font-weight: bold;
+  border-radius: 10px;
+  transition: transform 0.2s, box-shadow 0.3s;
+  font-size: 1rem;
+}
+
+.role-btn.hr {
+  background: #1E88E5;
+}
+
+.role-btn.candidate {
+  background: #4c9cdc;
+}
+
+.role-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+}
+
+/* Auth Pages (Login & Sign Up) */
+.auth-container {
+  background: #fff;
+  padding: 40px;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  width: 420px;
+  animation: fadeIn 0.8s ease;
+}
+
+.auth-card h2 {
+  text-align: center;
+  color: #0D47A1;
+  margin-bottom: 25px;
+  font-size: 1.6rem;
+}
+
 .form-group {
-  margin-bottom: 18px;
+  margin-bottom: 20px;
+  text-align: left;
 }
 
 label {
   display: block;
-  font-weight: 600;
   margin-bottom: 6px;
+  font-weight: 600;
   color: #0D47A1;
-  font-size: 0.9rem;
 }
 
-input[type="text"],
-input[type="email"],
-input[type="password"] {
+input {
   width: 100%;
   padding: 12px;
   border: 1px solid #BBDEFB;
-  border-radius: 8px;
-  font-size: 14px;
+  border-radius: 10px;
+  font-size: 15px;
   background: #f9fcff;
-  transition: all 0.3s ease;
+  transition: 0.3s;
 }
 
 input:focus {
   border-color: #1E88E5;
-  box-shadow: 0 0 6px rgba(30, 136, 229, 0.4);
+  box-shadow: 0 0 8px rgba(30,136,229,0.3);
   outline: none;
 }
 
-/* ===== Buttons ===== */
 .submit-btn {
   width: 100%;
   padding: 14px;
   background: #1E88E5;
   color: white;
-  font-size: 15px;
+  font-size: 16px;
   font-weight: bold;
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   cursor: pointer;
-  transition: all 0.3s ease;
-  letter-spacing: 0.5px;
+  transition: background 0.3s, transform 0.2s;
+  margin-top: 10px;
 }
 
 .submit-btn:hover {
   background: #1565C0;
   transform: translateY(-2px);
-  box-shadow: 0 4px 10px rgba(21, 101, 192, 0.3);
 }
 
-/* ===== Switch Link ===== */
 .switch-link {
-  margin-top: 18px;
+  margin-top: 20px;
+  font-size: 14px;
+  color: #333;
   text-align: center;
-  font-size: 0.9rem;
-  color: #555;
 }
 
 .switch-link a {
   color: #1E88E5;
+  font-weight: bold;
   text-decoration: none;
-  font-weight: 600;
 }
 
 .switch-link a:hover {
   text-decoration: underline;
 }
 
-/* ===== Animation ===== */
+/* Animation */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-20px); }
+  from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
 }
