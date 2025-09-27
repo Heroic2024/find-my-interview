@@ -22,25 +22,186 @@ interview-manager/
 
 ## 🗄️ Database Setup
 
-### 1. Create Database
+Save the SQL below as `recruitment_system.sql` at the repository root (C:\Users\Aryan Mhatre\find-my-interview\recruitment_system.sql) and import it into your local MySQL.
+
+Steps (PowerShell):
+1. Save the file.
+2. Import:
+   mysql -u root -p < "C:\Users\Aryan Mhatre\find-my-interview\recruitment_system.sql"
+   Or interactively:
+   mysql -u root -p
+   mysql> SOURCE C:/Users/Aryan Mhatre/find-my-interview/recruitment_system.sql;
+
+Verify:
+mysql -u root -p -e "USE recruitment_system; SHOW TABLES;"
+
+-- recruitment_system.sql (DDL + minimal sample data) --
 ```sql
--- Run this in your MySQL client
-CREATE DATABASE interview_manager;
-```
+-- Drop & create
+DROP DATABASE IF EXISTS recruitment_system;
+CREATE DATABASE recruitment_system;
+USE recruitment_system;
 
-### 2. Run Database Schema
-Copy the entire SQL schema from the database artifact and run it in your MySQL client or command line:
+-- COMPANIES
+CREATE TABLE companies (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    website VARCHAR(255)
+);
 
-```bash
-mysql -u root -p interview_manager < database/schema.sql
-```
+-- DEPARTMENTS
+CREATE TABLE departments (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    company_id INT NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE
+);
 
-### 3. Verify Tables
-```sql
-USE interview_manager;
-SHOW TABLES;
--- Should show: companies, departments, positions, candidates, interviews, etc.
+-- EMPLOYEES
+CREATE TABLE employees (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    company_id INT NOT NULL,
+    department_id INT NOT NULL,
+    first_name VARCHAR(100) NOT NULL,
+    last_name VARCHAR(100) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    username VARCHAR(100) UNIQUE NOT NULL,
+    role ENUM('hr','interviewer') NOT NULL,
+    auth_user_id INT UNIQUE,
+    FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE,
+    FOREIGN KEY (department_id) REFERENCES departments(id) ON DELETE CASCADE
+);
+
+-- POSITIONS
+CREATE TABLE positions (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    department_id INT NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    status ENUM('open','closed','on_hold') DEFAULT 'open',
+    job_description TEXT,
+    no_of_positions INT DEFAULT 1,
+    date_of_description DATE,
+    FOREIGN KEY (department_id) REFERENCES departments(id) ON DELETE CASCADE
+);
+
+-- CANDIDATES
+CREATE TABLE candidates (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    position_id INT NOT NULL,
+    company_id INT NOT NULL,
+    first_name VARCHAR(100) NOT NULL,
+    last_name VARCHAR(100) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    phone VARCHAR(20),
+    applied_on DATE NOT NULL,
+    status ENUM('applied','shortlisted','interview_scheduled','selected','rejected') DEFAULT 'applied',
+    auth_user_id INT UNIQUE,
+    FOREIGN KEY (position_id) REFERENCES positions(id) ON DELETE CASCADE,
+    FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE
+);
+
+-- ROUNDS
+CREATE TABLE rounds (
+    round_id INT AUTO_INCREMENT PRIMARY KEY,
+    round_name VARCHAR(100) NOT NULL
+);
+
+-- INTERVIEWS
+CREATE TABLE interviews (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    candidate_id INT NOT NULL,
+    position_id INT NOT NULL,
+    interviewer_id_1 INT NOT NULL,
+    interviewer_id_2 INT NULL,
+    interviewer_id_3 INT NULL,
+    round_id INT NOT NULL,
+    interview_date DATETIME NOT NULL,
+    status ENUM('scheduled','completed','canceled','pending') DEFAULT 'scheduled',
+    file_name VARCHAR(255),
+    file_path VARCHAR(500),
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (candidate_id) REFERENCES candidates(id) ON DELETE CASCADE,
+    FOREIGN KEY (position_id) REFERENCES positions(id) ON DELETE CASCADE,
+    FOREIGN KEY (interviewer_id_1) REFERENCES employees(id),
+    FOREIGN KEY (interviewer_id_2) REFERENCES employees(id),
+    FOREIGN KEY (interviewer_id_3) REFERENCES employees(id),
+    FOREIGN KEY (round_id) REFERENCES rounds(round_id)
+);
+
+-- AVAILABILITY_SLOTS
+CREATE TABLE availability_slots (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    interviewer_id INT NOT NULL,
+    day_of_week ENUM('Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday') NOT NULL,
+    start_time TIME NOT NULL,
+    end_time TIME NOT NULL,
+    FOREIGN KEY (interviewer_id) REFERENCES employees(id) ON DELETE CASCADE
+);
+
+-- INTERVIEW_REMINDERS
+CREATE TABLE interview_reminders (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    interview_id INT NOT NULL,
+    reminder_type ENUM('email','sms','notification') NOT NULL,
+    scheduled_time DATETIME NOT NULL,
+    FOREIGN KEY (interview_id) REFERENCES interviews(id) ON DELETE CASCADE
+);
+
+-- INTERVIEW_EVALUATIONS
+CREATE TABLE interview_evaluations (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    interview_id INT NOT NULL,
+    round_id INT NOT NULL,
+    criteria_name VARCHAR(255) NOT NULL,
+    score INT CHECK (score >= 0 AND score <= 10),
+    feedback TEXT,
+    rating INT CHECK (rating >= 1 AND rating <= 5),
+    FOREIGN KEY (interview_id) REFERENCES interviews(id) ON DELETE CASCADE,
+    FOREIGN KEY (round_id) REFERENCES rounds(round_id)
+);
+
+-- AUTH_USERS
+CREATE TABLE auth_users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    role ENUM('hr','interviewer','candidate') NOT NULL,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- SAMPLE DATA (minimal)
+INSERT INTO companies (name, email, website) VALUES
+('TechCorp', 'info@techcorp.com', 'www.techcorp.com'),
+('InnoSoft', 'contact@innosoft.com', 'www.innosoft.com');
+
+INSERT INTO departments (company_id, name) VALUES
+(1, 'Engineering'), (1, 'Human Resources'), (2, 'Product Development');
+
+INSERT INTO auth_users (email, password_hash, role) VALUES
+('hr@techcorp.com', 'hashed_pw1', 'hr'),
+('john.doe@techcorp.com', 'hashed_pw2', 'interviewer'),
+('jane.smith@innosoft.com', 'hashed_pw3', 'candidate');
+
+INSERT INTO employees (company_id, department_id, first_name, last_name, email, username, role, auth_user_id) VALUES
+(1, 2, 'Alice', 'Brown', 'hr@techcorp.com', 'alice_hr', 'hr', 1),
+(1, 1, 'John', 'Doe', 'john.doe@techcorp.com', 'jdoe_eng', 'interviewer', 2);
+
+INSERT INTO positions (department_id, title, status, job_description, no_of_positions, date_of_description) VALUES
+(1, 'Software Engineer', 'open', 'Backend developer role', 3, CURDATE());
+
+INSERT INTO candidates (position_id, company_id, first_name, last_name, email, phone, applied_on, status, auth_user_id) VALUES
+(1, 1, 'Jane', 'Smith', 'jane.smith@innosoft.com', '9876543210', CURDATE(), 'applied', 3);
+
+INSERT INTO rounds (round_name) VALUES ('Technical Round'), ('HR Round');
+
+INSERT INTO interviews (candidate_id, position_id, interviewer_id_1, round_id, interview_date, status, file_name, file_path) VALUES
+(1, 1, 2, 1, DATE_ADD(NOW(), INTERVAL 7 DAY), 'scheduled', 'resume.pdf', '/uploads/resume.pdf');
 ```
+-- End of DDL --
 
 ## ⚙️ Backend Setup
 
