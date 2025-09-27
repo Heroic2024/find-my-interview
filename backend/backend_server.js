@@ -3,10 +3,13 @@ const express = require('express');
 const mysql = require('mysql2/promise');
 const cors = require('cors');
 const path = require('path');
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const JWT_SECRET = process.env.JWT_SECRET || 'change-this-secret';
 
 // Middleware
 app.use(cors());
@@ -15,10 +18,10 @@ app.use(express.static('public')); // Serve static files
 
 // Database connection configuration
 const dbConfig = {
-    host: process.env.DB_HOST || 'localhost',
+    host: process.env.DB_HOST || '3306',
     user: process.env.DB_USER || 'root',
     password: process.env.DB_PASSWORD || '',
-    database: process.env.DB_NAME || 'interview_manager',
+    database: process.env.DB_NAME || 'recruitment_system',
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0
@@ -57,27 +60,104 @@ function formatInterviewData(interview) {
     };
 }
 
-// API Routes
+// Auth helpers
+function generateToken(user) {
+    return jwt.sign({ id: user.id, role: user.role }, JWT_SECRET, { expiresIn: '8h' });
+}
+
+async function getUserById(id) {
+    const [rows] = await pool.execute('SELECT id, email, role, is_active FROM auth_users WHERE id = ?', [id]);
+    return rows[0];
+}
+
+// Middleware: authenticate and attach req.user
+async function authenticateToken(req, res, next) {
+    const authHeader = req.headers.authorization || '';
+    const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+    if (!token) return res.status(401).json({ error: 'Authentication token required' });
+
+    try {
+        const payload = jwt.verify(token, JWT_SECRET);
+        const user = await getUserById(payload.id);
+        if (!user || !user.is_active) return res.status(401).json({ error: 'Invalid or inactive user' });
+        req.user = { id: user.id, role: user.role };
+        next();
+    } catch (err) {
+        return res.status(401).json({ error: 'Invalid token' });
+    }
+}
+
+function checkRole(allowedRoles = []) {
+    return (req, res, next) => {
+        if (!req.user) return res.status(401).json({ error: 'Not authenticated' });
+        if (!allowedRoles.includes(req.user.role)) return res.status(403).json({ error: 'Forbidden' });
+        next();
+    };
+}
+
+// Auth routes
+app.post('/api/auth/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        if (!email || !password) return res.status(400).json({ error: 'Email and password required' });
+
+        const [rows] = await pool.execute('SELECT id, email, password_hash, role, is_active FROM auth_users WHERE email = ?', [email]);
+        if (rows.length === 0) return res.status(401).json({ error: 'Invalid credentials' });
+
+        const user = rows[0];
+        const match = await bcrypt.compare(password, user.password_hash);
+        if (!match || !user.is_active) return res.status(401).json({ error: 'Invalid credentials or inactive user' });
+
+        const token = generateToken(user);
+        res.json({ token, user: { id: user.id, email: user.email, role: user.role } });
+    } catch (error) {
+        console.error('Auth error:', error);
+        res.status(500).json({ error: 'Login failed' });
+    }
+});
+
+// API Routes (protected where appropriate)
 
 // Get all interviews with detailed information
-app.get('/api/interviews', async (req, res) => {
+app.get('/api/interviews', authenticateToken, async (req, res) => {
     try {
         const { search, status } = req.query;
-        let query = 'SELECT * FROM interview_details WHERE 1=1';
-        let params = [];
+        let where = ' WHERE 1=1';
+        const params = [];
 
         if (search) {
-            query += ' AND (candidate_name LIKE ? OR position_title LIKE ? OR interviewer_name LIKE ?)';
-            const searchTerm = `%${search}%`;
-            params.push(searchTerm, searchTerm, searchTerm);
+            where += ' AND (c.first_name LIKE ? OR c.last_name LIKE ? OR p.title LIKE ? OR e.first_name LIKE ? OR e.last_name LIKE ?)';
+            const s = `%${search}%`;
+            params.push(s, s, s, s, s);
         }
 
         if (status) {
-            query += ' AND status = ?';
+            where += ' AND i.status = ?';
             params.push(status);
         }
 
-        query += ' ORDER BY interview_date ASC';
+        const query = `
+            SELECT
+                i.id,
+                CONCAT(c.first_name, ' ', c.last_name) AS candidate_name,
+                c.email AS candidate_email,
+                c.phone AS candidate_phone,
+                p.title AS position_title,
+                i.interview_date,
+                CONCAT(e.first_name, ' ', e.last_name) AS interviewer_name,
+                i.notes,
+                i.status,
+                ie.rating,
+                ie.feedback,
+                i.created_at
+            FROM interviews i
+            JOIN candidates c ON i.candidate_id = c.id
+            JOIN positions p ON i.position_id = p.id
+            LEFT JOIN employees e ON i.interviewer_id_1 = e.id
+            LEFT JOIN interview_evaluations ie ON ie.interview_id = i.id
+            ${where}
+            ORDER BY i.interview_date ASC
+        `;
 
         const [rows] = await pool.execute(query, params);
         const interviews = rows.map(formatInterviewData);
@@ -89,18 +169,33 @@ app.get('/api/interviews', async (req, res) => {
 });
 
 // Get single interview by ID
-app.get('/api/interviews/:id', async (req, res) => {
+app.get('/api/interviews/:id', authenticateToken, async (req, res) => {
     try {
         const { id } = req.params;
-        const [rows] = await pool.execute(
-            'SELECT * FROM interview_details WHERE id = ?',
-            [id]
-        );
+        const [rows] = await pool.execute(`
+            SELECT
+                i.id,
+                CONCAT(c.first_name, ' ', c.last_name) AS candidate_name,
+                c.email AS candidate_email,
+                c.phone AS candidate_phone,
+                p.title AS position_title,
+                i.interview_date,
+                CONCAT(e.first_name, ' ', e.last_name) AS interviewer_name,
+                i.notes,
+                i.status,
+                ie.rating,
+                ie.feedback,
+                i.created_at
+            FROM interviews i
+            JOIN candidates c ON i.candidate_id = c.id
+            JOIN positions p ON i.position_id = p.id
+            LEFT JOIN employees e ON i.interviewer_id_1 = e.id
+            LEFT JOIN interview_evaluations ie ON ie.interview_id = i.id
+            WHERE i.id = ?
+            LIMIT 1
+        `, [id]);
 
-        if (rows.length === 0) {
-            return res.status(404).json({ error: 'Interview not found' });
-        }
-
+        if (rows.length === 0) return res.status(404).json({ error: 'Interview not found' });
         res.json(formatInterviewData(rows[0]));
     } catch (error) {
         console.error('Error fetching interview:', error);
@@ -108,8 +203,8 @@ app.get('/api/interviews/:id', async (req, res) => {
     }
 });
 
-// Create new interview
-app.post('/api/interviews', async (req, res) => {
+// Create new interview (hr or interviewer)
+app.post('/api/interviews', authenticateToken, checkRole(['hr', 'interviewer']), async (req, res) => {
     const connection = await pool.getConnection();
     try {
         await connection.beginTransaction();
@@ -124,99 +219,96 @@ app.post('/api/interviews', async (req, res) => {
             notes
         } = req.body;
 
-        // Validate required fields
         if (!candidateName || !candidateEmail || !position || !interviewDate || !interviewer) {
             return res.status(400).json({ error: 'Missing required fields' });
         }
 
-        // Split candidate name
         const nameParts = candidateName.trim().split(' ');
         const firstName = nameParts[0];
         const lastName = nameParts.slice(1).join(' ') || '';
 
-        // Check if candidate exists, if not create one
+        // Candidate
         let candidateId;
-        const [existingCandidate] = await connection.execute(
-            'SELECT id FROM candidates WHERE email = ?',
-            [candidateEmail]
-        );
-
+        const [existingCandidate] = await connection.execute('SELECT id FROM candidates WHERE email = ?', [candidateEmail]);
         if (existingCandidate.length > 0) {
             candidateId = existingCandidate[0].id;
         } else {
             const [candidateResult] = await connection.execute(`
-                INSERT INTO candidates (first_name, last_name, email, phone, status)
-                VALUES (?, ?, ?, ?, 'interviewing')
+                INSERT INTO candidates (first_name, last_name, email, phone, status, applied_on)
+                VALUES (?, ?, ?, ?, 'interview_scheduled', CURDATE())
             `, [firstName, lastName, candidateEmail, candidatePhone || null]);
             candidateId = candidateResult.insertId;
         }
 
-        // Get or create position
+        // Position
         let positionId;
-        const [existingPosition] = await connection.execute(
-            'SELECT p.id FROM positions p JOIN departments d ON p.department_id = d.id WHERE p.title = ?',
-            [position]
-        );
-
+        const [existingPosition] = await connection.execute('SELECT id FROM positions WHERE title = ?', [position]);
         if (existingPosition.length > 0) {
             positionId = existingPosition[0].id;
         } else {
-            // Create position in first available department
             const [departments] = await connection.execute('SELECT id FROM departments LIMIT 1');
-            if (departments.length === 0) {
-                throw new Error('No departments found');
-            }
-
+            if (departments.length === 0) throw new Error('No departments found');
             const [positionResult] = await connection.execute(`
-                INSERT INTO positions (department_id, title, status)
-                VALUES (?, ?, 'active')
+                INSERT INTO positions (department_id, title, status, date_of_description)
+                VALUES (?, ?, 'open', CURDATE())
             `, [departments[0].id, position]);
             positionId = positionResult.insertId;
         }
 
-        // Get or create interviewer
+        // Interviewer -> employees table
         let interviewerId;
         const [existingInterviewer] = await connection.execute(
-            'SELECT id FROM interviewers WHERE CONCAT(first_name, " ", last_name) = ? OR email = ?',
+            'SELECT id FROM employees WHERE CONCAT(first_name, " ", last_name) = ? OR email = ?',
             [interviewer, interviewer]
         );
 
         if (existingInterviewer.length > 0) {
             interviewerId = existingInterviewer[0].id;
         } else {
-            // Create interviewer
-            const interviewerParts = interviewer.trim().split(' ');
-            const intFirstName = interviewerParts[0];
-            const intLastName = interviewerParts.slice(1).join(' ') || '';
-            const intEmail = `${intFirstName.toLowerCase()}.${intLastName.toLowerCase()}@company.com`;
+            const parts = interviewer.trim().split(' ');
+            const iFirst = parts[0];
+            const iLast = parts.slice(1).join(' ') || '';
+            const iEmail = `${iFirst.toLowerCase()}.${(iLast || 'x').toLowerCase()}@company.com`;
 
             const [companies] = await connection.execute('SELECT id FROM companies LIMIT 1');
-            if (companies.length === 0) {
-                throw new Error('No companies found');
-            }
+            if (companies.length === 0) throw new Error('No companies found');
 
             const [interviewerResult] = await connection.execute(`
-                INSERT INTO interviewers (company_id, first_name, last_name, email, job_title)
-                VALUES (?, ?, ?, ?, 'Interviewer')
-            `, [companies[0].id, intFirstName, intLastName, intEmail]);
+                INSERT INTO employees (company_id, department_id, first_name, last_name, email, username, role)
+                VALUES (?, ?, ?, ?, ?, ?, 'interviewer')
+            `, [companies[0].id, 1, iFirst, iLast, iEmail, `${iFirst.toLowerCase()}_${iLast.toLowerCase()}`]);
             interviewerId = interviewerResult.insertId;
         }
 
-        // Create interview
+        // Create interview (using interviewer_id_1 to match schema with multiple interviewer fields)
         const [interviewResult] = await connection.execute(`
             INSERT INTO interviews (
-                candidate_id, position_id, interviewer_id, interview_date,
-                interview_type, status, notes
-            ) VALUES (?, ?, ?, ?, 'video', 'scheduled', ?)
+                candidate_id, position_id, interviewer_id_1, interviewer_id_2, interviewer_id_3, round_id,
+                interview_date, status, notes, created_at
+            ) VALUES (?, ?, ?, NULL, NULL, NULL, ?, 'scheduled', ?, NOW())
         `, [candidateId, positionId, interviewerId, interviewDate, notes || null]);
 
         await connection.commit();
 
-        // Fetch the created interview with full details
-        const [newInterview] = await connection.execute(
-            'SELECT * FROM interview_details WHERE id = ?',
-            [interviewResult.insertId]
-        );
+        // Fetch created interview
+        const [newInterview] = await pool.execute(`
+            SELECT
+                i.id,
+                CONCAT(c.first_name, ' ', c.last_name) AS candidate_name,
+                c.email AS candidate_email,
+                c.phone AS candidate_phone,
+                p.title AS position_title,
+                i.interview_date,
+                CONCAT(e.first_name, ' ', e.last_name) AS interviewer_name,
+                i.notes,
+                i.status,
+                i.created_at
+            FROM interviews i
+            JOIN candidates c ON i.candidate_id = c.id
+            JOIN positions p ON i.position_id = p.id
+            LEFT JOIN employees e ON i.interviewer_id_1 = e.id
+            WHERE i.id = ?
+        `, [interviewResult.insertId]);
 
         res.status(201).json(formatInterviewData(newInterview[0]));
     } catch (error) {
@@ -228,8 +320,8 @@ app.post('/api/interviews', async (req, res) => {
     }
 });
 
-// Update interview
-app.put('/api/interviews/:id', async (req, res) => {
+// Update interview (hr or interviewer)
+app.put('/api/interviews/:id', authenticateToken, checkRole(['hr', 'interviewer']), async (req, res) => {
     const connection = await pool.getConnection();
     try {
         await connection.beginTransaction();
@@ -239,20 +331,15 @@ app.put('/api/interviews/:id', async (req, res) => {
             candidateName,
             candidateEmail,
             candidatePhone,
-            position,
             interviewDate,
-            interviewer,
             notes,
             status
         } = req.body;
 
-        // Get current interview details
         const [currentInterview] = await connection.execute(`
-            SELECT i.*, c.id as candidate_id, p.id as position_id, int.id as interviewer_id
+            SELECT i.id, c.id AS candidate_id
             FROM interviews i
             JOIN candidates c ON i.candidate_id = c.id
-            JOIN positions p ON i.position_id = p.id  
-            JOIN interviewers int ON i.interviewer_id = int.id
             WHERE i.id = ?
         `, [id]);
 
@@ -262,7 +349,6 @@ app.put('/api/interviews/:id', async (req, res) => {
 
         const current = currentInterview[0];
 
-        // Update candidate if needed
         if (candidateName || candidateEmail || candidatePhone) {
             const nameParts = candidateName ? candidateName.trim().split(' ') : [];
             const firstName = nameParts[0] || null;
@@ -278,23 +364,34 @@ app.put('/api/interviews/:id', async (req, res) => {
             `, [firstName, lastName, candidateEmail, candidatePhone, current.candidate_id]);
         }
 
-        // Update interview
         await connection.execute(`
             UPDATE interviews 
             SET interview_date = COALESCE(?, interview_date),
                 notes = COALESCE(?, notes),
-                status = COALESCE(?, status),
-                updated_at = CURRENT_TIMESTAMP
+                status = COALESCE(?, status)
             WHERE id = ?
         `, [interviewDate, notes, status, id]);
 
         await connection.commit();
 
-        // Fetch updated interview
-        const [updatedInterview] = await connection.execute(
-            'SELECT * FROM interview_details WHERE id = ?',
-            [id]
-        );
+        const [updatedInterview] = await pool.execute(`
+            SELECT
+                i.id,
+                CONCAT(c.first_name, ' ', c.last_name) AS candidate_name,
+                c.email AS candidate_email,
+                c.phone AS candidate_phone,
+                p.title AS position_title,
+                i.interview_date,
+                CONCAT(e.first_name, ' ', e.last_name) AS interviewer_name,
+                i.notes,
+                i.status,
+                i.created_at
+            FROM interviews i
+            JOIN candidates c ON i.candidate_id = c.id
+            JOIN positions p ON i.position_id = p.id
+            LEFT JOIN employees e ON i.interviewer_id_1 = e.id
+            WHERE i.id = ?
+        `, [id]);
 
         res.json(formatInterviewData(updatedInterview[0]));
     } catch (error) {
@@ -306,20 +403,12 @@ app.put('/api/interviews/:id', async (req, res) => {
     }
 });
 
-// Delete interview
-app.delete('/api/interviews/:id', async (req, res) => {
+// Delete interview (hr only)
+app.delete('/api/interviews/:id', authenticateToken, checkRole(['hr']), async (req, res) => {
     try {
         const { id } = req.params;
-        
-        const [result] = await pool.execute(
-            'DELETE FROM interviews WHERE id = ?',
-            [id]
-        );
-
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ error: 'Interview not found' });
-        }
-
+        const [result] = await pool.execute('DELETE FROM interviews WHERE id = ?', [id]);
+        if (result.affectedRows === 0) return res.status(404).json({ error: 'Interview not found' });
         res.json({ message: 'Interview deleted successfully' });
     } catch (error) {
         console.error('Error deleting interview:', error);
@@ -327,30 +416,37 @@ app.delete('/api/interviews/:id', async (req, res) => {
     }
 });
 
-// Update interview status
-app.patch('/api/interviews/:id/status', async (req, res) => {
+// Update interview status (hr or interviewer)
+app.patch('/api/interviews/:id/status', authenticateToken, checkRole(['hr', 'interviewer']), async (req, res) => {
     try {
         const { id } = req.params;
         const { status } = req.body;
 
-        if (!['scheduled', 'completed', 'cancelled', 'rescheduled', 'no-show'].includes(status)) {
-            return res.status(400).json({ error: 'Invalid status' });
-        }
+        const allowed = ['scheduled', 'completed', 'canceled', 'pending', 'interview_scheduled', 'no-show'];
+        if (!allowed.includes(status)) return res.status(400).json({ error: 'Invalid status' });
 
-        await pool.execute(
-            'UPDATE interviews SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
-            [status, id]
-        );
+        await pool.execute('UPDATE interviews SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?', [status, id]);
 
-        // Fetch updated interview
-        const [updatedInterview] = await pool.execute(
-            'SELECT * FROM interview_details WHERE id = ?',
-            [id]
-        );
+        const [updatedInterview] = await pool.execute(`
+            SELECT
+                i.id,
+                CONCAT(c.first_name, ' ', c.last_name) AS candidate_name,
+                c.email AS candidate_email,
+                c.phone AS candidate_phone,
+                p.title AS position_title,
+                i.interview_date,
+                CONCAT(e.first_name, ' ', e.last_name) AS interviewer_name,
+                i.notes,
+                i.status,
+                i.created_at
+            FROM interviews i
+            JOIN candidates c ON i.candidate_id = c.id
+            JOIN positions p ON i.position_id = p.id
+            LEFT JOIN employees e ON i.interviewer_id_1 = e.id
+            WHERE i.id = ?
+        `, [id]);
 
-        if (updatedInterview.length === 0) {
-            return res.status(404).json({ error: 'Interview not found' });
-        }
+        if (updatedInterview.length === 0) return res.status(404).json({ error: 'Interview not found' });
 
         res.json(formatInterviewData(updatedInterview[0]));
     } catch (error) {
@@ -359,8 +455,8 @@ app.patch('/api/interviews/:id/status', async (req, res) => {
     }
 });
 
-// Get dashboard statistics
-app.get('/api/dashboard/stats', async (req, res) => {
+// Get dashboard statistics (protected)
+app.get('/api/dashboard/stats', authenticateToken, async (req, res) => {
     try {
         const [stats] = await pool.execute(`
             SELECT 
@@ -370,7 +466,6 @@ app.get('/api/dashboard/stats', async (req, res) => {
                 SUM(CASE WHEN WEEK(interview_date) = WEEK(CURDATE()) AND YEAR(interview_date) = YEAR(CURDATE()) THEN 1 ELSE 0 END) as this_week_count
             FROM interviews
         `);
-
         res.json(stats[0]);
     } catch (error) {
         console.error('Error fetching dashboard stats:', error);
@@ -379,30 +474,45 @@ app.get('/api/dashboard/stats', async (req, res) => {
 });
 
 // Get upcoming interviews for dashboard
-app.get('/api/dashboard/upcoming', async (req, res) => {
+app.get('/api/dashboard/upcoming', authenticateToken, async (req, res) => {
     try {
         const [rows] = await pool.execute(`
-            SELECT * FROM interview_details 
-            WHERE status = 'scheduled' AND interview_date >= NOW()
-            ORDER BY interview_date ASC 
+            SELECT
+                i.id,
+                CONCAT(c.first_name, ' ', c.last_name) AS candidate_name,
+                p.title AS position_title,
+                i.interview_date,
+                CONCAT(e.first_name, ' ', e.last_name) AS interviewer_name,
+                i.status
+            FROM interviews i
+            JOIN candidates c ON i.candidate_id = c.id
+            JOIN positions p ON i.position_id = p.id
+            LEFT JOIN employees e ON i.interviewer_id_1 = e.id
+            WHERE i.status = 'scheduled' AND i.interview_date >= NOW()
+            ORDER BY i.interview_date ASC
             LIMIT 5
         `);
-
-        const upcomingInterviews = rows.map(formatInterviewData);
-        res.json(upcomingInterviews);
+        res.json(rows.map(r => ({
+            id: r.id,
+            candidateName: r.candidate_name,
+            position: r.position_title,
+            interviewDate: r.interview_date,
+            interviewer: r.interviewer_name,
+            status: r.status
+        })));
     } catch (error) {
         console.error('Error fetching upcoming interviews:', error);
         res.status(500).json({ error: 'Failed to fetch upcoming interviews' });
     }
 });
 
-// Get all interviewers
-app.get('/api/interviewers', async (req, res) => {
+// Get all interviewers (protected)
+app.get('/api/interviewers', authenticateToken, async (req, res) => {
     try {
         const [rows] = await pool.execute(`
             SELECT id, CONCAT(first_name, ' ', last_name) as name, email
-            FROM interviewers 
-            WHERE is_active = TRUE
+            FROM employees 
+            WHERE role = 'interviewer' AND (is_active IS NULL OR is_active = TRUE)
             ORDER BY first_name, last_name
         `);
         res.json(rows);
@@ -412,14 +522,14 @@ app.get('/api/interviewers', async (req, res) => {
     }
 });
 
-// Get all positions
-app.get('/api/positions', async (req, res) => {
+// Get all positions (protected)
+app.get('/api/positions', authenticateToken, async (req, res) => {
     try {
         const [rows] = await pool.execute(`
             SELECT p.id, p.title, d.name as department_name
             FROM positions p
             JOIN departments d ON p.department_id = d.id
-            WHERE p.status = 'active'
+            WHERE p.status = 'open'
             ORDER BY p.title
         `);
         res.json(rows);
@@ -454,8 +564,8 @@ app.use((req, res) => {
 async function startServer() {
     await testConnection();
     app.listen(PORT, () => {
-        console.log(`🚀 Interview Manager Server running on http://localhost:${3000}`);
-        console.log(`📊 API endpoints available at http://localhost:${3000}/api/`);
+        console.log(`🚀 Interview Manager Server running on http://localhost:${PORT}`);
+        console.log(`📊 API endpoints available at http://localhost:${PORT}/api/`);
     });
 }
 
