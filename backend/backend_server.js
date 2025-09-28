@@ -20,7 +20,7 @@ app.use(express.json());
 const dbConfig = {
     host: process.env.DB_HOST || '3306',
     user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD || '',
+    password: process.env.DB_PASSWORD || 'root',
     database: process.env.DB_NAME || 'recruitment_system',
     waitForConnections: true,
     connectionLimit: 10,
