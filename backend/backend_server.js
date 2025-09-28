@@ -14,7 +14,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'change-this-secret';
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.static('public')); // Serve static files
+//app.use(express.static('public')); // Serve static files
 
 // Database connection configuration
 const dbConfig = {
@@ -117,6 +117,11 @@ app.post('/api/auth/login', async (req, res) => {
 });
 
 // API Routes (protected where appropriate)
+
+//api testing route
+app.get('/api', (req, res) => {
+  res.json({ message: "API is working!" });
+});
 
 // Get all interviews with detailed information
 app.get('/api/interviews', authenticateToken, async (req, res) => {
@@ -541,7 +546,7 @@ app.get('/api/positions', authenticateToken, async (req, res) => {
 
 // Serve the main HTML file
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    res.sendFile(path.join(__dirname, 'frontend', 'HR_HomePage.html'));
 });
 
 // Health check endpoint
