@@ -9,10 +9,18 @@
     window.onload = () => {
       const params = new URLSearchParams(window.location.search);
       const role = params.get("role") || "candidate";
+
+      // Set role-specific title
       document.getElementById("roleTitle").innerText =
         role === "hr" ? "👔 HR Sign Up" : "👩‍💻 Candidate Sign Up";
-      document.getElementById("loginLink").href =
-        `login.html?role=${role}`;
+
+      // Update login link with same role
+      document.getElementById("loginLink").href = `login.html?role=${role}`;
+
+      // Show company name field if HR
+      if (role === "hr") {
+        document.getElementById("companyField").style.display = "block";
+      }
     };
   </script>
 </head>
@@ -24,6 +32,10 @@
         <div class="form-group">
           <label>Full Name</label>
           <input type="text" required placeholder="Enter your full name">
+        </div>
+        <div class="form-group" id="companyField" style="display: none;">
+          <label>Company Name</label>
+          <input type="text" placeholder="Enter your company name">
         </div>
         <div class="form-group">
           <label>Email</label>
