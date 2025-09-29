@@ -1,0 +1,178 @@
+/* Body & Background */
+body {
+    line-height: 1.6;
+    color: #fff;
+    background: url("Media_3.jpg") no-repeat center center;
+    background-size: cover;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    text-align: center;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+}
+
+/* Container */
+.container {
+    width: 100%;
+    max-width: 1200px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+    justify-content: right;
+}
+
+/* Left Branding Section */
+.branding {
+    flex: 1;
+    min-width: 350px;
+    background: rgba(0,0,50,0.6); /* Dark frosted overlay */
+    padding: 3rem 1.5rem 3rem 2rem; /* top right bottom left */
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.branding h1 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    color: #ffffff;
+}
+
+.branding p {
+    font-size: 1rem;
+    margin-bottom: 2rem;
+    line-height: 1.6;
+    color: #cfd8dc;
+}
+
+.branding img {
+  width: 450px;   /* set desired width */
+  height: 300px;  /* set desired height */
+  border-radius: 15px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.branding img:hover {
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: 0 15px 30px rgba(0,198,255,0.5);
+}
+
+/* Right Form Section */
+.form-section {
+    flex: 1.5;
+    min-width: 450px;
+    background: rgba(0,0,80,0.7); /* Darker blue card */
+    padding: 3rem 1.5rem 3rem 2rem; /* reduced right padding */
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+}
+
+/* Form Headings */
+.form-section h2 {
+    color: #ffffff;
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.subtitle {
+    color: #b0bec5;
+    margin-bottom: 25px;
+}
+
+/* Form Groups */
+.form-group {
+    margin-bottom: 18px;
+}
+
+.form-row {
+    display: flex;
+    gap: 15px;
+}
+
+/* Labels */
+label {
+    font-weight: 600;
+    color:#ffffff;
+    margin-bottom: 6px;
+    display: block;
+}
+
+/* Inputs */
+input,
+select,
+textarea {
+    width: 85%;
+    padding: 15px;
+    border: 2px solid #1565c0;
+    border-radius: 10px;
+    font-size: 14px;
+    background: rgba(0,0,50,0.4);
+    color: #e3f2fd;
+    transition: 0.3s ease;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    border-color: #00c6ff;
+    box-shadow: 0 0 8px rgba(0,198,255,0.5);
+    outline: none;
+}
+
+/* Textarea */
+textarea {
+    resize: none;
+}
+
+/* Submit Button */
+.submit-btn {
+    width: 100%;
+    padding: 14px;
+    background: #1565c0;
+    color: #fff;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.3s ease;
+    margin-top: 10px;
+}
+
+.submit-btn:hover {
+    background: #0d47a1;
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 8px 20px rgba(0,198,255,0.6);
+}
+
+/* Switch Link */
+.switch-link {
+    margin-top: 15px;
+    font-size: 14px;
+    color: #b0bec5;
+    text-align: center;
+}
+
+.switch-link a {
+    color: #00c6ff;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.switch-link a:hover {
+    text-decoration: underline;
+}
+
+/* Responsive */
+@media(max-width:900px) {
+    .container {
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+}
