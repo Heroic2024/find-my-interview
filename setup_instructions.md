@@ -86,20 +86,31 @@ CREATE TABLE positions (
 );
 
 -- CANDIDATES
+-- ...existing code...
+DROP TABLE IF EXISTS candidates;
 CREATE TABLE candidates (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    position_id INT NOT NULL,
-    company_id INT NOT NULL,
+    position_id INT NULL,
+    position_text VARCHAR(255) NULL, -- free-text position when position_id not provided
+    company_id INT NULL,
     first_name VARCHAR(100) NOT NULL,
     last_name VARCHAR(100) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
     phone VARCHAR(20),
-    applied_on DATE NOT NULL,
+    applied_on DATE NOT NULL DEFAULT (CURRENT_DATE),
     status ENUM('applied','shortlisted','interview_scheduled','selected','rejected') DEFAULT 'applied',
     auth_user_id INT UNIQUE,
-    FOREIGN KEY (position_id) REFERENCES positions(id) ON DELETE CASCADE,
-    FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE
+    education VARCHAR(255),
+    experience_years INT CHECK (experience_years >= 0),
+    skills TEXT,
+    location VARCHAR(255),
+    resume_file_name VARCHAR(255),
+    resume_file_path VARCHAR(500),
+    notes TEXT,
+    FOREIGN KEY (position_id) REFERENCES positions(id) ON DELETE SET NULL,
+    FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE SET NULL
 );
+-- ...existing code...
 
 -- ROUNDS
 CREATE TABLE rounds (
