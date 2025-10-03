@@ -5,23 +5,28 @@ const cors = require('cors');
 const path = require('path');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const multer = require('multer');
+const fs = require('fs');
 require('dotenv').config();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
-const JWT_SECRET = process.env.JWT_SECRET || 'change-this-secret';
+const PORT = process.env.PORT;
+const JWT_SECRET = process.env.JWT_SECRET;
+
+//point to frontend folder
+const PUBLIC_DIR = path.join(__dirname, "../frontend");
 
 // Middleware
 app.use(cors());
 app.use(express.json());
-//app.use(express.static('public')); // Serve static files
+app.use(express.static('../frontend')); // Serve static files
 
 // Database connection configuration
 const dbConfig = {
-    host: process.env.DB_HOST || '3306',
-    user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD || 'root',
-    database: process.env.DB_NAME || 'recruitment_system',
+    host: process.env.DB_HOST ,
+    user: process.env.DB_USER ,
+    password: process.env.DB_PASSWORD, 
+    database: process.env.DB_NAME,
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0
@@ -544,9 +549,101 @@ app.get('/api/positions', authenticateToken, async (req, res) => {
     }
 });
 
+// ensure uploads dir exists and serve it
+const uploadsDir = path.join(__dirname, 'public', 'uploads');
+if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+app.use('/uploads', express.static(uploadsDir));
+
+// multer storage
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, uploadsDir),
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    const fname = Date.now() + '-' + Math.random().toString(36).slice(2,8) + ext;
+    cb(null, fname);
+  }
+});
+const upload = multer({ storage });
+
+// Candidate apply (public) — handles resume upload and stores form into candidates table
+app.post('/api/candidates/apply', upload.single('resume'), async (req, res) => {
+  const connection = await pool.getConnection();
+  try {
+    const {
+      fullname, email, phone, position, education, experience, skills, location, notes
+    } = req.body;
+
+    if (!fullname || !email) {
+      connection.release();
+      return res.status(400).json({ error: 'fullname and email are required' });
+    }
+
+    const parts = fullname.trim().split(' ');
+    const first_name = parts[0];
+    const last_name = parts.slice(1).join(' ') || '';
+
+    // check duplicate by email
+    const [exists] = await connection.execute('SELECT id FROM candidates WHERE email = ?', [email]);
+    if (exists.length > 0) {
+      connection.release();
+      return res.status(409).json({ error: 'Candidate with this email already applied' });
+    }
+
+    await connection.beginTransaction();
+
+    // resolve position_id if frontend sent a title (optional)
+    let position_id = null;
+    if (req.body.position_id) position_id = parseInt(req.body.position_id, 10);
+    else if (position) {
+      const [posRows] = await connection.execute('SELECT id FROM positions WHERE title = ? LIMIT 1', [position]);
+      if (posRows.length) position_id = posRows[0].id;
+    }
+
+    const resume_file_name = req.file ? req.file.filename : null;
+    const resume_file_path = req.file ? `/uploads/${req.file.filename}` : null;
+
+    const [result] = await connection.execute(
+      `INSERT INTO candidates
+       (position_id, position_text, company_id, first_name, last_name, email, phone, applied_on, status, auth_user_id,
+        education, experience_years, skills, location, resume_file_name, resume_file_path, notes)
+       VALUES (?, ?, NULL, ?, ?, ?, ?, CURDATE(), 'applied', NULL, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        position_id,
+        position || null,
+        first_name,
+        last_name,
+        email,
+        phone || null,
+        education || null,
+        experience ? parseInt(experience, 10) : null,
+        skills || null,
+        location || null,
+        resume_file_name,
+        resume_file_path,
+        notes || null
+      ]
+    );
+
+    await connection.commit();
+    connection.release();
+
+    res.status(201).json({ id: result.insertId, message: 'Application submitted' });
+  } catch (err) {
+    await connection.rollback().catch(()=>{});
+    connection.release();
+    console.error('Apply error:', err);
+    res.status(500).json({ error: 'Failed to submit application' });
+  }
+});
+
 // Serve the main HTML file
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'frontend', 'HR_HomePage.html'));
+    res.sendFile(path.join(PUBLIC_DIR, 'Landing_Page1.html'));
+    
+});
+
+app.get('/candidateRegistration', (req, res) => {
+    res.sendFile(path.join(PUBLIC_DIR, 'candidate_registration.html'));
 });
 
 // Health check endpoint
