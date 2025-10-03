@@ -46,8 +46,17 @@ USE recruitment_system;
 CREATE TABLE companies (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
-    email VARCHAR(255) UNIQUE NOT NULL,
-    website VARCHAR(255)
+    industry VARCHAR(100) NOT NULL,
+    registration_number VARCHAR(100) NOT NULL UNIQUE,
+    gstin VARCHAR(30) DEFAULT NULL,
+    official_email VARCHAR(150) NOT NULL UNIQUE,
+    website VARCHAR(255) DEFAULT NULL,
+    contact_number VARCHAR(20) NOT NULL,
+    company_size ENUM('1-10','11-50','51-200','201-1000','1000+') NOT NULL,
+    address TEXT NOT NULL,
+    logo_certificate VARCHAR(255) DEFAULT NULL, -- store file path / name
+    password_hash VARCHAR(255) NOT NULL, -- store hashed password
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- DEPARTMENTS
@@ -86,7 +95,6 @@ CREATE TABLE positions (
 );
 
 -- CANDIDATES
--- ...existing code...
 DROP TABLE IF EXISTS candidates;
 CREATE TABLE candidates (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -110,12 +118,11 @@ CREATE TABLE candidates (
     FOREIGN KEY (position_id) REFERENCES positions(id) ON DELETE SET NULL,
     FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE SET NULL
 );
--- ...existing code...
 
 -- ROUNDS
 CREATE TABLE rounds (
-    round_id INT AUTO_INCREMENT PRIMARY KEY,
-    round_name VARCHAR(100) NOT NULL
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL
 );
 
 -- INTERVIEWS
@@ -138,7 +145,7 @@ CREATE TABLE interviews (
     FOREIGN KEY (interviewer_id_1) REFERENCES employees(id),
     FOREIGN KEY (interviewer_id_2) REFERENCES employees(id),
     FOREIGN KEY (interviewer_id_3) REFERENCES employees(id),
-    FOREIGN KEY (round_id) REFERENCES rounds(round_id)
+    FOREIGN KEY (round_id) REFERENCES rounds(id)
 );
 
 -- AVAILABILITY_SLOTS
@@ -170,7 +177,7 @@ CREATE TABLE interview_evaluations (
     feedback TEXT,
     rating INT CHECK (rating >= 1 AND rating <= 5),
     FOREIGN KEY (interview_id) REFERENCES interviews(id) ON DELETE CASCADE,
-    FOREIGN KEY (round_id) REFERENCES rounds(round_id)
+    FOREIGN KEY (round_id) REFERENCES rounds(id)
 );
 
 -- AUTH_USERS
