@@ -1,0 +1,159 @@
+/* General Layout */
+body {
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    background: linear-gradient(135deg, #dbefff, #f7faff);
+    margin: 0;
+    padding: 30px;
+    color: #1a3d6d;
+  }
+  
+  /* Form Container */
+  .form-container {
+    max-width: 1100px;   /* ✅ increased width */width: 95%;
+    background: #ffffff;
+    margin: auto;
+    padding: 35px;
+    border-radius: 16px;
+    box-shadow: 0px 8px 20px rgba(0, 50, 100, 0.12);
+    border: 1px solid #c7defc;
+    transition: transform 0.2s ease, box-shadow 0.3s ease;
+  }
+  
+  .form-container:hover {
+    transform: translateY(-2px);
+    box-shadow: 0px 10px 24px rgba(0, 50, 100, 0.18);
+  }
+  
+  /* Progress Bar */
+  .progress-bar {
+    width: 100%;
+    background: #e3ecff;
+    height: 8px;
+    border-radius: 6px;
+    margin-bottom: 25px;
+    overflow: hidden;
+  }
+  .progress {
+    width: 0%;
+    height: 100%;
+    background: linear-gradient(90deg, #4a90e2, #357ab8);
+    transition: width 0.4s ease;
+    border-radius: 6px;
+  }
+  
+  /* Titles */
+  .form-container h1 {
+    text-align: center;
+    color: #123c74;
+    margin-bottom: 10px;
+    font-size: 1.8rem;
+  }
+  
+  .subtitle {
+    text-align: center;
+    color: #357ab8;
+    margin-bottom: 30px;
+    font-size: 1rem;
+    font-weight: 500;
+  }
+  
+  /* Grid Layout */
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px;
+  }
+  .form-group.full-width {
+    grid-column: span 2;
+  }
+  
+  /* Labels */
+  .registration-form label {
+    display: block;
+    margin: 6px 0 6px;
+    font-weight: 600;
+    color: #123c74;
+    font-size: 0.95rem;
+  }
+  
+  /* Input Fields with Icons */
+  /* Input Fields with Icons */
+.input-icon {
+    position: relative;
+  }
+  
+  .input-icon i {
+    position: absolute;
+    top: 50%;
+    left: 14px;
+    transform: translateY(-50%);
+    font-size: 18px;
+    color: #4a90e2;
+    pointer-events: none;
+  }
+  
+  .input-icon input,
+  .input-icon select,
+  .input-icon textarea {
+    width: 100%;
+    padding: 12px 12px 12px 48px; /* more space for icons */
+    border: 1.5px solid #d0e4ff;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    transition: border 0.3s, box-shadow 0.3s, transform 0.2s;
+    background: #fafcff;
+  }
+  
+  
+  /* Inputs, Selects, Textarea */
+  /* Inputs, Selects, Textarea */
+.registration-form input,
+.registration-form select,
+.registration-form textarea {
+  width: 90%;
+  padding: 12px 12px 12px 48px;
+  border: 1.5px solid #d0e4ff;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  transition: border 0.3s, box-shadow 0.3s, transform 0.2s;
+  background: #fafcff;
+}
+
+  
+  .registration-form input:focus,
+  .registration-form select:focus,
+  .registration-form textarea:focus {
+    border-color: #4a90e2;
+    box-shadow: 0 0 10px rgba(74, 144, 226, 0.25);
+    outline: none;
+    transform: scale(1.01);
+  }
+  
+  /* Textarea */
+  .registration-form textarea {
+    resize: vertical;
+    min-height: 90px;
+  }
+  
+  /* Submit Button */
+  .registration-form button {
+    display: block;
+    width: 100%;
+    margin-top: 30px;
+    padding: 14px;
+    background: linear-gradient(135deg, #4a90e2, #357ab8);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 1.05rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.2s, box-shadow 0.3s;
+  }
+  
+  .registration-form button:hover {
+    background: linear-gradient(135deg, #357ab8, #2d6ca2);
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0px 6px 15px rgba(53, 122, 184, 0.4);
+  }
+  
