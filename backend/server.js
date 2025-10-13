@@ -12,6 +12,7 @@ const JWT_SECRET = process.env.JWT_SECRET;
 const app = express();
 const PORT = process.env.PORT || 3000;
 const PUBLIC_DIR = path.join(__dirname, "../frontend");
+
 // Middleware
 app.use(cors());
 app.use(express.json());
@@ -45,6 +46,11 @@ app.get("/api/db-status", async (req, res) => {
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(PUBLIC_DIR, 'Landing_Page1.html'));
+    
+});
+
+app.get('/companyRegistration', (req, res) => {
+    res.sendFile(path.join(PUBLIC_DIR, 'company_register_test.html'));
     
 });
 // Serve registration page
