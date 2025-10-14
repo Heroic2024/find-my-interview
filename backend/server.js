@@ -58,6 +58,8 @@ app.get("/candidateRegistration", (req, res) => {
   res.sendFile(path.join(PUBLIC_DIR, "candidate_registration.html"));
 });
 
+app.get
+
 // Candidate apply route
 app.post("/api/candidates/apply", upload.single("resume"), async (req, res) => {
   try {
@@ -107,6 +109,47 @@ app.post("/api/candidates/apply", upload.single("resume"), async (req, res) => {
   }
 });
 
+// Company register route
+app.post("/api/companies/apply", upload.single("logo"), async (req, res) => {
+  try {
+    const {
+      companyName,
+      industry,
+      regNo,
+      gstin,
+      officialEmail,
+      website,  
+      contact,
+      size,
+      address,
+      password
+    } = req.body;
+
+    const logo_file_name = req.file ? req.file.originalname : null;
+    const logo_file_path = req.file ? req.file.path : null;
+    // Insert company into DB
+    const result = await db.insertCompany({
+      companyName,
+      industry,
+      regNo,
+      gstin,  
+      officialEmail,
+      website,
+      contact,          
+      size,
+      address,
+      logo_file_name,
+      logo_file_path,
+      password
+    });
+    
+    console.log("Company registered with ID:", result.insertId);
+    res.json({ message: "Company registered", id: result.insertId });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
 
 
 // Auth routes
@@ -158,7 +201,9 @@ app.get("/test", (req, res) => res.send("Server is working"));
 
 const authRoutes = require('./routes/auth');
 const candidateRoutes = require('./routes/candidates');
+//const companyRoutes = require('./routes/companies');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/candidates', candidateRoutes);
+//app.use('/api/companies', companyRoutes);
 
