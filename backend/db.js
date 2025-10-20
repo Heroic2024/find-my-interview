@@ -1,6 +1,7 @@
 // backend/db.js
 const mysql = require('mysql2/promise');
-
+const bcrypt = require('bcrypt');
+require('dotenv').config();
 
 const pool = mysql.createPool({
   host: process.env.DB_HOST || 'localhost',
@@ -64,9 +65,27 @@ const [result] = await pool.query(
 
 
 async function verifyCandidate(userData) {
-    const [rows] = await pool.execute('SELECT * FROM candidates WHERE email = ? and password = ?', [userData.email, userData.password]);
+    const [rows] = await pool.execute('SELECT * FROM candidates WHERE email = ?', [userData.email]);
     console.log("Rows found:", rows.length );
-    return rows;
+    if (rows.length === 0) return [];
+
+    const user = rows[0];
+    // support either column name used for the hash
+    const storedHash = user.password_hash || user.password || null;
+    if (!storedHash) {
+      console.warn('No stored password hash for user:', user.email);
+      return [];
+    }
+
+    // compare provided plain password with stored hash
+    const match = await bcrypt.compare(userData.password, storedHash);
+    if (!match) {
+      console.log('Password mismatch for user:', user.email);
+      return [];
+    }
+
+    // success — return the user row (keeps callsites expecting array)
+    return [user];
   }
 
 async function insertCompany(companyData) {
