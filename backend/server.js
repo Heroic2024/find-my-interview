@@ -2,6 +2,7 @@
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
+const bcrypt = require("bcrypt");
 const multer = require("multer"); // for file uploads
 const fs = require("fs");
 const db  = require("./db"); // mysql2 connection 
@@ -62,6 +63,7 @@ app.get
 
 // Candidate apply route
 app.post("/api/candidates/apply", upload.single("resume"), async (req, res) => {
+  const password_hash = await bcrypt.hash(req.body.password, 10);
   try {
     const {
       fullname,
@@ -73,7 +75,7 @@ app.post("/api/candidates/apply", upload.single("resume"), async (req, res) => {
       skills,
       location,
       notes,
-      password
+      //password
     } = req.body;
 
     const resume_file_name = req.file ? req.file.originalname : null;
@@ -98,7 +100,7 @@ app.post("/api/candidates/apply", upload.single("resume"), async (req, res) => {
       notes,
       resume_file_name,
       resume_file_path,
-      password
+      password_hash
   });
     
     console.log("Application submitted with ID:", result.insertId);
@@ -111,6 +113,7 @@ app.post("/api/candidates/apply", upload.single("resume"), async (req, res) => {
 
 // Company register route
 app.post("/api/companies/apply", upload.single("logo"), async (req, res) => {
+  const password_hash = await bcrypt.hash(req.body.password, 10);
   try {
     const {
       companyName,
@@ -122,11 +125,12 @@ app.post("/api/companies/apply", upload.single("logo"), async (req, res) => {
       contact,
       size,
       address,
-      password
+      //password_hash
     } = req.body;
 
     const logo_file_name = req.file ? req.file.originalname : null;
     const logo_file_path = req.file ? req.file.path : null;
+    
     // Insert company into DB
     const result = await db.insertCompany({
       companyName,
@@ -140,7 +144,7 @@ app.post("/api/companies/apply", upload.single("logo"), async (req, res) => {
       address,
       logo_file_name,
       logo_file_path,
-      password
+      password_hash
     });
     
     console.log("Company registered with ID:", result.insertId);
@@ -178,6 +182,8 @@ app.post('/api/auth/login', async (req, res) => {
 function generateToken(user) {
     return jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: '8h' });
 }
+
+
 
 // Fallback route for unknown endpoints
 app.use((req, res) => {

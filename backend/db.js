@@ -55,7 +55,7 @@ const [result] = await pool.query(
         userData.notes,
         userData.resume_file_name,
         userData.resume_file_path,
-        userData.password
+        userData.password_hash
       ]
     ); 
     console.log("Candidate inserted with ID:", result.insertId);
@@ -63,10 +63,45 @@ const [result] = await pool.query(
   }
 
 
-  async function verifyCandidate(userData) {
+async function verifyCandidate(userData) {
     const [rows] = await pool.execute('SELECT * FROM candidates WHERE email = ? and password = ?', [userData.email, userData.password]);
     console.log("Rows found:", rows.length );
     return rows;
   }
-    
-module.exports = {testConnection, insertCandidate, verifyCandidate};
+
+async function insertCompany(companyData) {
+    console.log("Inserting company:", companyData);
+    const [result] = await pool.query(
+      `INSERT INTO companies (
+      name, 
+      industry,
+      registration_number,
+      gstin,
+      official_email,
+      website,
+      contact_number,
+      company_size,
+      address,
+      logo_file_name,
+      logo_file_path,
+      password_hash) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        companyData.companyName,
+        companyData.industry,
+        companyData.regNo,
+        companyData.gstin,
+        companyData.officialEmail,
+        companyData.website,
+        companyData.contact,
+        companyData.size,
+        companyData.address,
+        companyData.logo_file_name,
+        companyData.logo_file_path,
+        companyData.password_hash
+      ]
+    );
+    console.log("Company inserted with ID:", result.insertId);
+    return result;
+  }
+
+module.exports = {testConnection, insertCandidate, verifyCandidate, insertCompany};
