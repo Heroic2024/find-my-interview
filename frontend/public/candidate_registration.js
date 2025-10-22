@@ -1,5 +1,4 @@
 // Progress bar updates as user fills fields
-//to check if this the file used
 const form = document.getElementById("registrationForm");
 const inputs = form.querySelectorAll("input, select, textarea");
 const progress = document.querySelector(".progress");

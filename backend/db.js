@@ -1,6 +1,7 @@
 // backend/db.js
 const mysql = require('mysql2/promise');
-
+const bcrypt = require('bcrypt');
+require('dotenv').config();
 
 const pool = mysql.createPool({
   host: process.env.DB_HOST || 'localhost',
@@ -55,7 +56,7 @@ const [result] = await pool.query(
         userData.notes,
         userData.resume_file_name,
         userData.resume_file_path,
-        userData.password
+        userData.password_hash
       ]
     ); 
     console.log("Candidate inserted with ID:", result.insertId);
@@ -63,10 +64,63 @@ const [result] = await pool.query(
   }
 
 
-  async function verifyCandidate(userData) {
-    const [rows] = await pool.execute('SELECT * FROM candidates WHERE email = ? and password = ?', [userData.email, userData.password]);
+async function verifyCandidate(userData) {
+    const [rows] = await pool.execute('SELECT * FROM candidates WHERE email = ?', [userData.email]);
     console.log("Rows found:", rows.length );
-    return rows;
+    if (rows.length === 0) return [];
+
+    const user = rows[0];
+    // support either column name used for the hash
+    const storedHash = user.password_hash || user.password || null;
+    if (!storedHash) {
+      console.warn('No stored password hash for user:', user.email);
+      return [];
+    }
+
+    // compare provided plain password with stored hash
+    const match = await bcrypt.compare(userData.password, storedHash);
+    if (!match) {
+      console.log('Password mismatch for user:', user.email);
+      return [];
+    }
+
+    // success — return the user row (keeps callsites expecting array)
+    return [user];
   }
-    
-module.exports = {testConnection, insertCandidate, verifyCandidate};
+
+async function insertCompany(companyData) {
+    console.log("Inserting company:", companyData);
+    const [result] = await pool.query(
+      `INSERT INTO companies (
+      name, 
+      industry,
+      registration_number,
+      gstin,
+      official_email,
+      website,
+      contact_number,
+      company_size,
+      address,
+      logo_file_name,
+      logo_file_path,
+      password_hash) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        companyData.companyName,
+        companyData.industry,
+        companyData.regNo,
+        companyData.gstin,
+        companyData.officialEmail,
+        companyData.website,
+        companyData.contact,
+        companyData.size,
+        companyData.address,
+        companyData.logo_file_name,
+        companyData.logo_file_path,
+        companyData.password_hash
+      ]
+    );
+    console.log("Company inserted with ID:", result.insertId);
+    return result;
+  }
+
+module.exports = {testConnection, insertCandidate, verifyCandidate, insertCompany};
