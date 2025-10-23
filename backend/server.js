@@ -12,7 +12,8 @@ const JWT_SECRET = process.env.JWT_SECRET;
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const PUBLIC_DIR = path.join(__dirname, "../frontend");
+const PRIVATE_DIR = path.join(__dirname, "../frontend/private");
+const PUBLIC_DIR = path.join(__dirname, "../frontend/public");
 
 // Middleware
 app.use(cors());
@@ -20,9 +21,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Serve static frontend files
-//app.use(express.static(path.join(__dirname, "public")));
-app.use(express.static(path.join(__dirname, "../frontend/public")));
+app.use(express.static(path.join("../frontend", 'public')));
 
+  
 // Multer setup for resume uploads
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -37,6 +38,22 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
+function authenticateCompany(req, res, next) {
+  const authHeader = req.headers['authorization'];
+  if (!authHeader) return res.status(401).json({ error: "No token provided" });
+
+  const token = authHeader.split(' ')[1];
+  if (!token) return res.status(401).json({ error: "Invalid token" });
+
+  try {
+      const decoded = jwt.verify(token, JWT_SECRET);
+      req.company = decoded; // attach decoded company info to request
+      next();
+  } catch (err) {
+      return res.status(403).json({ error: "Token invalid or expired" });
+  }
+}
+
 // ==================== DB CONNECTION CHECK ==================== //
 // Lightweight DB status endpoint
 app.get("/api/db-status", async (req, res) => {
@@ -46,11 +63,12 @@ app.get("/api/db-status", async (req, res) => {
 // ==================== ROUTES ==================== //
 
 app.get('/', (req, res) => {
-    res.sendFile(path.join(PUBLIC_DIR, 'Landing_Page1.html'));
+    res.sendFile(path.join(PUBLIC_DIR,'Landing_Page1.html'));
     
 });
 
 app.get('/companyRegistration', (req, res) => {
+    console.log("Serving company registration page");
     res.sendFile(path.join(PUBLIC_DIR, 'company_register_test.html'));
     
 });
@@ -58,8 +76,24 @@ app.get('/companyRegistration', (req, res) => {
 app.get("/candidateRegistration", (req, res) => {
   res.sendFile(path.join(PUBLIC_DIR, "candidate_registration.html"));
 });
+// serve com
+/*app.get("/companyLogin", (req, res) => {
+  console.log("Serving company login page");
+  res.sendFile(path.join(PUBLIC_DIR, "company_login.html"));
+});*/
 
-app.get
+// serve candidate landing page
+app.get("/candidateLanding", (req, res) => {
+  res.sendFile(path.join(PRIVATE_DIR, "candidate_landing_page.html"));
+});
+
+app.get("/hrHomePage", (req, res) => {
+  res.sendFile(path.join(PRIVATE_DIR, "HR_HomePage.html"));
+});
+
+
+// ==================== ROUTES END HERE ==================== //
+
 
 // Candidate apply route
 app.post("/api/candidates/apply", upload.single("resume"), async (req, res) => {
@@ -113,6 +147,7 @@ app.post("/api/candidates/apply", upload.single("resume"), async (req, res) => {
 
 // Company register route
 app.post("/api/companies/apply", upload.single("logo"), async (req, res) => {
+  console.log("Received company registration data:", req.body);
   const password_hash = await bcrypt.hash(req.body.password, 10);
   try {
     const {
@@ -156,8 +191,9 @@ app.post("/api/companies/apply", upload.single("logo"), async (req, res) => {
 });
 
 
-// Auth routes
+// ==================== AUTH ROUTES ==================== // 
 app.post('/api/auth/login', async (req, res) => {
+    console.log('Login attempt for candidate:', req.body.email);
     try {
         const { email, password } = req.body;
         if (!email || !password) return res.status(400).json({ error: 'Email and password required' });
@@ -178,12 +214,41 @@ app.post('/api/auth/login', async (req, res) => {
     }
 });
 
+
+app.post('/api/companies/login', async (req, res) => {
+  const { officialEmail, password } = req.body;
+
+  if (!officialEmail || !password) {
+    return res.status(400).json({ error: "Email and password are required." });
+  }
+
+  try {
+    const company = await db.verifyCompany({ officialEmail, password });
+
+    if (!company) return res.status(401).json({ error: "Invalid credentials" });
+
+    const token = jwt.sign(
+      { companyId: company.id, email: company.official_email },
+      JWT_SECRET,
+      { expiresIn: "8h" }
+    );
+
+    res.json({
+      message: "Login successful",
+      token,
+      company: { id: company.id, name: company.name, email: company.official_email },
+    });
+  } catch (err) {
+    console.error("Company login error:", err);
+    res.status(500).json({ error: "Server error during login" });
+  }
+});
+
 // Auth helpers
 function generateToken(user) {
+    console.log('Generating token for user ID:', user.id);
     return jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: '8h' });
 }
-
-
 
 // Fallback route for unknown endpoints
 app.use((req, res) => {
@@ -205,11 +270,11 @@ startServer().catch(err => {
 
 app.get("/test", (req, res) => res.send("Server is working"));
 
-const authRoutes = require('./routes/auth');
-const candidateRoutes = require('./routes/candidates');
+//const authRoutes = require('./routes/auth');
+//const candidateRoutes = require('./routes/candidates');
 //const companyRoutes = require('./routes/companies');
 
-app.use('/api/auth', authRoutes);
-app.use('/api/candidates', candidateRoutes);
+//app.use('/api/auth', authRoutes);
+//app.use('/api/candidates', candidateRoutes);
 //app.use('/api/companies', companyRoutes);
 
