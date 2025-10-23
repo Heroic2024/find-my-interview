@@ -123,4 +123,19 @@ async function insertCompany(companyData) {
     return result;
   }
 
-module.exports = {testConnection, insertCandidate, verifyCandidate, insertCompany};
+async function verifyCompany({ officialEmail, password }) {
+  const [rows] = await pool.execute('SELECT * FROM companies WHERE official_email = ?', [officialEmail]);
+  if (rows.length === 0) return null;
+
+  const company = rows[0];
+  const match = await bcrypt.compare(password, company.password_hash);
+  if (!match) return null;
+
+  return company;
+}
+
+async function query(sql, params) {
+  const [rows] = await pool.query(sql, params);
+  return rows;
+}
+module.exports = {testConnection, insertCandidate, verifyCandidate, insertCompany, verifyCompany, query};
