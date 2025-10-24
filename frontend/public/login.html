@@ -4,12 +4,18 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Login - Interview Manager</title>
-  <link rel="stylesheet" href="auth.css" />
+  <link rel="stylesheet" href="login.css" />
 </head>
 <body class="gradient-bg">
   <div class="auth-container">
     <div class="auth-card">
+      <!-- HireHive logo (place your logo at public/assets/hirehive-logo.png or update src) -->
+      <div class="auth-logo" style="text-align:center; margin-bottom:16px;">
+        <img src="interview_manager_whitebg.png" alt="HireHive" style="max-width:160px; height:auto; display:inline-block;">
+      </div>
+
       <h2 id="roleTitle">Login</h2>
+      <h3 class="auth-subtitle">Welcome back! Please login to your account.</h3>
 
       <!-- Login Form -->
       <form id="loginForm">
@@ -26,7 +32,7 @@
 
       <p class="switch-link">
         Don’t have an account? 
-        <a id="signupLink" href="#">Sign up</a>
+        <a id="signupLink" href="candidate_registration.html">Sign up</a>
       </p>
     </div>
   </div>
