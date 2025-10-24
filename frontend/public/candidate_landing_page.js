@@ -86,6 +86,12 @@
       }
     }
 
+    // logout.js
+    function logout() {
+      localStorage.removeItem('token');
+      localStorage.removeItem('candidateId');
+      window.location.href = 'login.html'; // or your actual login page
+    }
     // Initialize
     const candidateActivities = new CandidateActivities();
   
