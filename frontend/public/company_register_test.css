@@ -2,17 +2,17 @@
 body {
     line-height: 1.6;
     color: #fff;
-    background: url("Media_3.jpg") no-repeat center center;
-    background-size: cover;
+    background: url("Media_3.jpg") no-repeat center center fixed;
+    background-size: contain cover;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     text-align: center;
     min-height: 100vh;
     display: flex;
     justify-content: center;
-    align-items: center;
-    padding: 2rem;
+    align-items: flex-start; /* start content from top */
+    padding: 2rem 0;
+    overflow-y: auto; /* allow scrolling */
 }
-
 /* Container */
 .container {
     width: 100%;
