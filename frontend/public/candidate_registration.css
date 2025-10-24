@@ -23,6 +23,18 @@ body {
     transform: translateY(-2px);
     box-shadow: 0px 10px 24px rgba(0, 50, 100, 0.18);
   }
+
+  .login-btn {
+      background: #4a90e2;
+      color: #fff;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(239, 68, 68, 0.18);
+      transition: background 0.15s ease, transform 0.06s ease;
+    }
   
   /* Progress Bar */
   .progress-bar {
