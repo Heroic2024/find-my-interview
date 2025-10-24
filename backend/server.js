@@ -244,6 +244,54 @@ app.post('/api/companies/login', async (req, res) => {
   }
 });
 
+app.get("/api/companies", authenticateCompany, async (req, res) => {
+  try {
+    const email = req.query.email;
+    if (!email) return res.status(400).json({ error: "Email is required" });
+
+    const rows = await db.query("SELECT * FROM companies WHERE official_email = ?", [email]);
+    console.log("🔹 Raw DB rows:", rows);
+
+    // Handle mysql vs mysql2
+    const company = Array.isArray(rows) ? rows[0] : rows;
+    console.log("🔹 Company object to send:", company);
+
+    if (!company) return res.status(404).json({ message: "Company not found" });
+
+    res.json(company);
+  } catch (err) {
+    console.error("❌ Error fetching company:", err);
+    res.status(500).json({ error: "Database error" });
+  }
+});
+
+app.get("/api/candidates", authenticateCompany, async (req, res) => {
+  try {
+    const candidates = await db.getAllCandidates();
+    
+    const formattedCandidates = candidates.map(candidate => ({
+      id: candidate.id,
+      name: `${candidate.first_name} ${candidate.last_name}`.trim(),
+      email: candidate.email,
+      phone: candidate.phone,
+      position: candidate.position,
+      experience: `${candidate.experience_years} years`,
+      education: candidate.education,
+      skills: candidate.skills,
+      location: candidate.location,
+      status: "pending",
+      appliedDate: new Date().toISOString().split('T')[0],
+      resume_file_name: candidate.resume_file_name,
+      resume_file_path: candidate.resume_file_path
+    }));
+
+    res.json(formattedCandidates);
+  } catch (err) {
+    console.error("❌ Error fetching candidates:", err);
+    res.status(500).json({ error: "Failed to fetch candidates" });
+  }
+});
+
 // Auth helpers
 function generateToken(user) {
     console.log('Generating token for user ID:', user.id);
