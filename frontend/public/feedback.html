@@ -1,0 +1,1284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interview Feedback</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .header {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      margin-bottom: 30px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .header h1 {
+      color: #667eea;
+      margin-bottom: 10px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+
+    .tab {
+      padding: 12px 24px;
+      border: none;
+      background: #f0f0f0;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+
+    .tab.active {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .content-section {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      display: none;
+    }
+
+    .content-section.active {
+      display: block;
+    }
+
+    .interview-selector {
+      background: #f9f9f9;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 30px;
+    }
+
+    .interview-selector select {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+
+    .candidate-info {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 30px;
+      display: none;
+    }
+
+    .candidate-info.show {
+      display: block;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-top: 15px;
+    }
+
+    .info-item {
+      background: rgba(255,255,255,0.2);
+      padding: 10px;
+      border-radius: 8px;
+    }
+
+    .info-label {
+      font-size: 12px;
+      opacity: 0.9;
+      margin-bottom: 5px;
+    }
+
+    .info-value {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .section-title {
+      color: #667eea;
+      font-size: 20px;
+      margin: 30px 0 20px 0;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #e0e0e0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .rating-section {
+      background: #f9f9f9;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+
+    .rating-item {
+      margin-bottom: 25px;
+    }
+
+    .rating-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .rating-label {
+      font-weight: 600;
+      color: #333;
+      font-size: 16px;
+    }
+
+    .rating-value {
+      background: #667eea;
+      color: white;
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-weight: 700;
+      min-width: 50px;
+      text-align: center;
+    }
+
+    .slider-container {
+      margin: 10px 0;
+    }
+
+    .slider {
+      width: 100%;
+      height: 8px;
+      border-radius: 5px;
+      background: #e0e0e0;
+      outline: none;
+      appearance: none;
+    }
+
+    .slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #667eea;
+      cursor: pointer;
+    }
+
+    .slider::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #667eea;
+      cursor: pointer;
+      border: none;
+    }
+
+    .rating-scale {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: #999;
+      margin-top: 5px;
+    }
+
+    textarea {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 14px;
+      resize: vertical;
+      min-height: 80px;
+      margin-top: 10px;
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    .stars-container {
+      display: flex;
+      gap: 10px;
+      margin: 15px 0;
+      justify-content: center;
+    }
+
+    .star {
+      font-size: 40px;
+      cursor: pointer;
+      color: #e0e0e0;
+      transition: all 0.2s;
+    }
+
+    .star.active,
+    .star:hover {
+      color: #ffd700;
+      transform: scale(1.2);
+    }
+
+    .recommendation-options {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 15px;
+      margin: 15px 0;
+    }
+
+    .recommendation-option {
+      padding: 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .recommendation-option:hover {
+      border-color: #667eea;
+      transform: translateY(-2px);
+    }
+
+    .recommendation-option.selected {
+      border-color: #667eea;
+      background: #f0f4ff;
+    }
+
+    .recommendation-option input {
+      display: none;
+    }
+
+    .recommendation-icon {
+      font-size: 30px;
+      margin-bottom: 10px;
+    }
+
+    .recommendation-label {
+      font-weight: 600;
+      color: #333;
+      font-size: 14px;
+    }
+
+    .checkbox-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 15px 0;
+      padding: 15px;
+      background: #fff3cd;
+      border-radius: 8px;
+    }
+
+    .checkbox-container input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+    }
+
+    .checkbox-container label {
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .score-summary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 25px;
+      border-radius: 15px;
+      margin: 30px 0;
+      text-align: center;
+    }
+
+    .total-score {
+      font-size: 48px;
+      font-weight: 700;
+      margin: 10px 0;
+    }
+
+    .score-label {
+      font-size: 16px;
+      opacity: 0.9;
+    }
+
+    .btn {
+      padding: 15px 30px;
+      border: none;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .btn-primary {
+      background: #667eea;
+      color: white;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: #5568d3;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102,126,234,0.4);
+    }
+
+    .btn-primary:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      margin-top: 30px;
+    }
+
+    .alert {
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      display: none;
+    }
+
+    .alert-success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .alert-error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    .feedback-card {
+      background: #f9f9f9;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-left: 5px solid #667eea;
+    }
+
+    .feedback-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      margin-bottom: 15px;
+    }
+
+    .feedback-candidate {
+      font-size: 18px;
+      font-weight: 700;
+      color: #333;
+    }
+
+    .feedback-date {
+      color: #999;
+      font-size: 14px;
+    }
+
+    .feedback-scores {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 15px;
+      margin: 15px 0;
+    }
+
+    .score-item {
+      background: white;
+      padding: 15px;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .score-name {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 5px;
+    }
+
+    .score-number {
+      font-size: 24px;
+      font-weight: 700;
+      color: #667eea;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #999;
+    }
+
+    @media (max-width: 768px) {
+      .recommendation-options {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>📝 Interview Feedback System</h1>
+      <p style="color: #666; margin-top: 10px;">Comprehensive evaluation and rating system for candidate interviews</p>
+      
+      <div class="tabs">
+        <button class="tab active" onclick="showTab('submit')">Submit Feedback</button>
+        <button class="tab" onclick="showTab('view')">View All Feedback</button>
+      </div>
+    </div>
+
+    <!-- Submit Feedback Section -->
+    <div id="submit" class="content-section active">
+      <div class="interview-selector">
+        <label style="font-weight: 600; color: #666; display: block; margin-bottom: 10px;">
+          Select Completed Interview *
+        </label>
+        <select id="interviewSelect" required>
+          <option value="">Loading interviews...</option>
+        </select>
+      </div>
+
+      <div id="candidateInfo" class="candidate-info">
+        <h3>📋 Interview Details</h3>
+        <div class="info-grid">
+          <div class="info-item">
+            <div class="info-label">Candidate</div>
+            <div class="info-value" id="infoCandidate">-</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Position</div>
+            <div class="info-value" id="infoPosition">-</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Interview Date</div>
+            <div class="info-value" id="infoDate">-</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Round</div>
+            <div class="info-value" id="infoRound">-</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="feedbackForm" style="display: none;">
+        <div id="formAlert" class="alert"></div>
+
+        <!-- Interviewer Name -->
+        <div class="section-title">
+          <span>👤</span> Interviewer Information
+        </div>
+        <div class="rating-section">
+          <label class="rating-label" style="display: block; margin-bottom: 10px;">Your Name *</label>
+          <input type="text" id="interviewerName" placeholder="Enter your name" 
+                 style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;" required>
+        </div>
+
+        <!-- Rating Sections -->
+        <div class="section-title">
+          <span>📊</span> Skills Assessment (Rate 0-10)
+        </div>
+
+        <div class="rating-section">
+          <!-- Technical Skills -->
+          <div class="rating-item">
+            <div class="rating-header">
+              <span class="rating-label">💻 Technical Skills</span>
+              <span class="rating-value" id="techValue">5</span>
+            </div>
+            <div class="slider-container">
+              <input type="range" min="0" max="10" value="5" class="slider" id="technicalSkills">
+              <div class="rating-scale">
+                <span>Poor (0)</span>
+                <span>Average (5)</span>
+                <span>Excellent (10)</span>
+              </div>
+            </div>
+            <textarea id="technicalComments" placeholder="Comments on technical skills..."></textarea>
+          </div>
+
+          <!-- Communication Skills -->
+          <div class="rating-item">
+            <div class="rating-header">
+              <span class="rating-label">💬 Communication Skills</span>
+              <span class="rating-value" id="commValue">5</span>
+            </div>
+            <div class="slider-container">
+              <input type="range" min="0" max="10" value="5" class="slider" id="communicationSkills">
+              <div class="rating-scale">
+                <span>Poor (0)</span>
+                <span>Average (5)</span>
+                <span>Excellent (10)</span>
+              </div>
+            </div>
+            <textarea id="communicationComments" placeholder="Comments on communication skills..."></textarea>
+          </div>
+
+          <!-- Problem Solving -->
+          <div class="rating-item">
+            <div class="rating-header">
+              <span class="rating-label">🧩 Problem Solving</span>
+              <span class="rating-value" id="problemValue">5</span>
+            </div>
+            <div class="slider-container">
+              <input type="range" min="0" max="10" value="5" class="slider" id="problemSolving">
+              <div class="rating-scale">
+                <span>Poor (0)</span>
+                <span>Average (5)</span>
+                <span>Excellent (10)</span>
+              </div>
+            </div>
+            <textarea id="problemComments" placeholder="Comments on problem-solving abilities..."></textarea>
+          </div>
+
+          <!-- Cultural Fit -->
+          <div class="rating-item">
+            <div class="rating-header">
+              <span class="rating-label">🤝 Cultural Fit</span>
+              <span class="rating-value" id="cultureValue">5</span>
+            </div>
+            <div class="slider-container">
+              <input type="range" min="0" max="10" value="5" class="slider" id="culturalFit">
+              <div class="rating-scale">
+                <span>Poor (0)</span>
+                <span>Average (5)</span>
+                <span>Excellent (10)</span>
+              </div>
+            </div>
+            <textarea id="cultureComments" placeholder="Comments on cultural fit..."></textarea>
+          </div>
+
+          <!-- Leadership Potential -->
+          <div class="rating-item">
+            <div class="rating-header">
+              <span class="rating-label">👔 Leadership Potential</span>
+              <span class="rating-value" id="leadershipValue">5</span>
+            </div>
+            <div class="slider-container">
+              <input type="range" min="0" max="10" value="5" class="slider" id="leadershipPotential">
+              <div class="rating-scale">
+                <span>Poor (0)</span>
+                <span>Average (5)</span>
+                <span>Excellent (10)</span>
+              </div>
+            </div>
+            <textarea id="leadershipComments" placeholder="Comments on leadership potential..."></textarea>
+          </div>
+        </div>
+
+        <!-- Score Summary -->
+        <div class="score-summary">
+          <div class="score-label">Total Skills Score</div>
+          <div class="total-score" id="totalScore">25/50</div>
+          <div class="score-label">Average: <span id="averageScore">5.0</span>/10</div>
+        </div>
+
+        <!-- Overall Rating -->
+        <div class="section-title">
+          <span>⭐</span> Overall Rating
+        </div>
+        <div class="rating-section">
+          <p style="color: #666; margin-bottom: 15px; text-align: center;">Give an overall star rating for this interview</p>
+          <div class="stars-container" id="starsContainer">
+            <span class="star" data-value="1">★</span>
+            <span class="star" data-value="2">★</span>
+            <span class="star" data-value="3">★</span>
+            <span class="star" data-value="4">★</span>
+            <span class="star" data-value="5">★</span>
+          </div>
+          <p style="text-align: center; color: #667eea; font-weight: 600; font-size: 18px;" id="ratingText">No rating selected</p>
+        </div>
+
+        <!-- Strengths & Weaknesses -->
+        <div class="section-title">
+          <span>📝</span> Detailed Assessment
+        </div>
+        <div class="rating-section">
+          <label class="rating-label" style="display: block; margin-bottom: 10px;">💪 Key Strengths</label>
+          <textarea id="strengths" placeholder="List the candidate's key strengths and standout qualities..." rows="4"></textarea>
+
+          <label class="rating-label" style="display: block; margin: 20px 0 10px 0;">⚠️ Areas for Improvement</label>
+          <textarea id="weaknesses" placeholder="List areas where the candidate could improve..." rows="4"></textarea>
+
+          <label class="rating-label" style="display: block; margin: 20px 0 10px 0;">📌 Additional Notes</label>
+          <textarea id="additionalNotes" placeholder="Any additional comments or observations..." rows="4"></textarea>
+        </div>
+
+        <!-- Recommendation -->
+        <div class="section-title">
+          <span>✅</span> Hiring Recommendation
+        </div>
+        <div class="rating-section">
+          <div class="recommendation-options">
+            <label class="recommendation-option">
+              <input type="radio" name="recommendation" value="strongly_recommend">
+              <div class="recommendation-icon">🌟</div>
+              <div class="recommendation-label">Strongly Recommend</div>
+            </label>
+            <label class="recommendation-option">
+              <input type="radio" name="recommendation" value="recommend">
+              <div class="recommendation-icon">👍</div>
+              <div class="recommendation-label">Recommend</div>
+            </label>
+            <label class="recommendation-option">
+              <input type="radio" name="recommendation" value="neutral">
+              <div class="recommendation-icon">😐</div>
+              <div class="recommendation-label">Neutral</div>
+            </label>
+            <label class="recommendation-option">
+              <input type="radio" name="recommendation" value="not_recommend">
+              <div class="recommendation-icon">👎</div>
+              <div class="recommendation-label">Not Recommend</div>
+            </label>
+            <label class="recommendation-option">
+              <input type="radio" name="recommendation" value="strongly_not_recommend">
+              <div class="recommendation-icon">❌</div>
+              <div class="recommendation-label">Strongly Not Recommend</div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Follow-up Required -->
+        <div class="checkbox-container">
+          <input type="checkbox" id="requiresFollowup">
+          <label for="requiresFollowup">⚠️ This candidate requires follow-up interview/assessment</label>
+        </div>
+        <div id="followupNotesContainer" style="display: none; margin-top: 15px;">
+          <textarea id="followupNotes" placeholder="Explain why follow-up is needed and what should be covered..." rows="3"></textarea>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="form-actions">
+          <button type="button" class="btn btn-primary" id="submitBtn" onclick="submitFeedback()">
+            📤 Submit Feedback
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- View Feedback Section -->
+    <div id="view" class="content-section">
+      <h2 style="margin-bottom: 20px; color: #333;">📊 All Submitted Feedback</h2>
+      
+      <div style="margin-bottom: 20px;">
+        <input type="text" id="searchFeedback" placeholder="🔍 Search by candidate name..." 
+               style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;">
+      </div>
+
+      <div id="feedbackList">
+        <div class="loading">Loading feedback...</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = '/api';
+    let selectedInterview = null;
+    let overallRating = 0;
+    let allFeedback = [];
+  
+    function getToken() {
+      return localStorage.getItem('companyToken');
+    }
+  
+    // Simple alert UI handlers
+    function showAlert(message, type = 'success', timeout = 4000) {
+      const alertEl = document.getElementById('formAlert');
+      alertEl.style.display = 'block';
+      alertEl.textContent = message;
+      alertEl.className = 'alert ' + (type === 'error' ? 'alert-error' : 'alert-success');
+  
+      if (timeout > 0) {
+        setTimeout(() => {
+          clearAlert();
+        }, timeout);
+      }
+    }
+  
+    function clearAlert() {
+      const alertEl = document.getElementById('formAlert');
+      alertEl.style.display = 'none';
+      alertEl.textContent = '';
+      alertEl.className = 'alert';
+    }
+  
+    function showTab(tabName) {
+      document.querySelectorAll('.content-section').forEach(section => {
+        section.classList.remove('active');
+      });
+      
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+  
+      // `event` may be undefined if invoked programmatically; guard it
+      try { if (event && event.target) event.target.classList.add('active'); } catch(e){}
+  
+      document.getElementById(tabName).classList.add('active');
+  
+      if (tabName === 'view') {
+        loadAllFeedback();
+      }
+    }
+  
+    // Load interviews for feedback
+    document.addEventListener('DOMContentLoaded', () => {
+      loadInterviewsForFeedback();
+      setupSliders();
+      setupStars();
+      setupRecommendations();
+      setupFollowup();
+      updateTotalScore();
+      // Search feedback input handler
+      const searchInput = document.getElementById('searchFeedback');
+      if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+          renderFeedbackList(filterFeedbackByName(e.target.value));
+        });
+      }
+    });
+  
+    async function loadInterviewsForFeedback() {
+      const token = getToken();
+      const select = document.getElementById('interviewSelect');
+      select.disabled = true;
+      select.innerHTML = '<option value="">Loading interviews...</option>';
+  
+      if (!token) {
+        select.innerHTML = '<option value="">Please log in to load interviews</option>';
+        showAlert('Not logged in. Please log in as a company to submit feedback.', 'error', 6000);
+        return;
+      }
+  
+      try {
+        const response = await fetch(`${API_URL}/interviews/for-feedback`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+  
+        if (!response.ok) {
+          throw new Error('Failed to fetch interviews');
+        }
+  
+        const interviews = await response.json();
+  
+        if (!Array.isArray(interviews) || interviews.length === 0) {
+          select.innerHTML = '<option value="">No completed interviews available for feedback</option>';
+          return;
+        }
+  
+        select.innerHTML = '<option value="">Select an interview...</option>' +
+          interviews.map(i => {
+            const date = new Date(i.interview_date).toLocaleDateString();
+            // ensure candidate_name exists (some API payloads might differ)
+            const candidateName = i.candidate_name || (i.first_name ? (i.first_name + (i.last_name ? ' ' + i.last_name : '')) : 'Candidate');
+            return `<option value="${i.id}">${escapeHtml(candidateName)} - ${escapeHtml(i.position || '')} (${date})</option>`;
+          }).join('');
+  
+        select.disabled = false;
+  
+        // keep a reference to the interviews on the select element for lookup
+        select.__interviews = interviews;
+  
+        select.addEventListener('change', function() {
+          const interviewId = this.value;
+          if (interviewId) {
+            selectedInterview = (this.__interviews || []).find(i => i.id == interviewId);
+            showInterviewDetails();
+          } else {
+            selectedInterview = null;
+            hideInterviewDetails();
+          }
+        });
+  
+      } catch (error) {
+        console.error('Error loading interviews:', error);
+        select.innerHTML = '<option value="">Error loading interviews</option>';
+        showAlert('Error loading interviews. Check console for details.', 'error');
+      }
+    }
+  
+    function showInterviewDetails() {
+      if (!selectedInterview) return;
+  
+      document.getElementById('candidateInfo').classList.add('show');
+      document.getElementById('feedbackForm').style.display = 'block';
+  
+      const candidateName = selectedInterview.candidate_name || `${selectedInterview.first_name || ''} ${selectedInterview.last_name || ''}`.trim();
+      document.getElementById('infoCandidate').textContent = candidateName || '-';
+      document.getElementById('infoPosition').textContent = selectedInterview.position || '-';
+      document.getElementById('infoDate').textContent = selectedInterview.interview_date ? new Date(selectedInterview.interview_date).toLocaleString() : '-';
+      document.getElementById('infoRound').textContent = selectedInterview.round || '-';
+  
+      // prefill interviewer name if company email stored? (not assumed)
+      // Reset form fields to sensible defaults when interview is changed
+      resetFormFields();
+    }
+  
+    function hideInterviewDetails() {
+      document.getElementById('candidateInfo').classList.remove('show');
+      document.getElementById('feedbackForm').style.display = 'none';
+    }
+  
+    // Sliders setup (already added earlier but ensure initial update)
+    function setupSliders() {
+      const sliders = [
+        { id: 'technicalSkills', valueId: 'techValue' },
+        { id: 'communicationSkills', valueId: 'commValue' },
+        { id: 'problemSolving', valueId: 'problemValue' },
+        { id: 'culturalFit', valueId: 'cultureValue' },
+        { id: 'leadershipPotential', valueId: 'leadershipValue' }
+      ];
+  
+      sliders.forEach(slider => {
+        const element = document.getElementById(slider.id);
+        const valueElement = document.getElementById(slider.valueId);
+  
+        if (!element || !valueElement) return;
+  
+        element.addEventListener('input', function() {
+          valueElement.textContent = this.value;
+          updateTotalScore();
+        });
+      });
+    }
+  
+    function updateTotalScore() {
+      const tech = parseInt(document.getElementById('technicalSkills').value || 0);
+      const comm = parseInt(document.getElementById('communicationSkills').value || 0);
+      const problem = parseInt(document.getElementById('problemSolving').value || 0);
+      const culture = parseInt(document.getElementById('culturalFit').value || 0);
+      const leadership = parseInt(document.getElementById('leadershipPotential').value || 0);
+  
+      const total = tech + comm + problem + culture + leadership;
+      const average = (total / 5).toFixed(1);
+  
+      document.getElementById('totalScore').textContent = `${total}/50`;
+      document.getElementById('averageScore').textContent = average;
+    }
+  
+    // Stars (overall rating)
+    function setupStars() {
+      const stars = document.querySelectorAll('.star');
+      
+      stars.forEach(star => {
+        star.addEventListener('click', function() {
+          overallRating = parseInt(this.dataset.value);
+          updateStars();
+        });
+  
+        star.addEventListener('mouseenter', function() {
+          const value = parseInt(this.dataset.value);
+          highlightStars(value);
+        });
+      });
+  
+      const starsContainer = document.getElementById('starsContainer');
+      if (starsContainer) {
+        starsContainer.addEventListener('mouseleave', () => {
+          updateStars();
+        });
+      }
+    }
+  
+    function highlightStars(count) {
+      const stars = document.querySelectorAll('.star');
+      stars.forEach((star, index) => {
+        if (index < count) {
+          star.classList.add('active');
+        } else {
+          star.classList.remove('active');
+        }
+      });
+    }
+  
+    function updateStars() {
+      highlightStars(overallRating);
+      const ratingText = document.getElementById('ratingText');
+      if (overallRating === 0) {
+        ratingText.textContent = 'No rating selected';
+      } else {
+        const labels = ['', 'Poor', 'Fair', 'Good', 'Very Good', 'Excellent'];
+        ratingText.textContent = `${overallRating} Stars - ${labels[overallRating]}`;
+      }
+    }
+  
+    // Recommendation selection visuals
+    function setupRecommendations() {
+      const options = document.querySelectorAll('.recommendation-option');
+      
+      options.forEach(option => {
+        option.addEventListener('click', function() {
+          options.forEach(opt => opt.classList.remove('selected'));
+          this.classList.add('selected');
+          const input = this.querySelector('input[type="radio"]');
+          if (input) input.checked = true;
+        });
+      });
+    }
+  
+    // Followup handler
+    function setupFollowup() {
+      const checkbox = document.getElementById('requiresFollowup');
+      const notesContainer = document.getElementById('followupNotesContainer');
+  
+      if (!checkbox || !notesContainer) return;
+  
+      checkbox.addEventListener('change', function() {
+        if (this.checked) {
+          notesContainer.style.display = 'block';
+        } else {
+          notesContainer.style.display = 'none';
+          document.getElementById('followupNotes').value = '';
+        }
+      });
+    }
+  
+    // Submit feedback handler (completes the cut-off code)
+    async function submitFeedback() {
+      if (!selectedInterview) {
+        showAlert('Please select an interview', 'error');
+        return;
+      }
+  
+      const interviewerName = document.getElementById('interviewerName').value.trim();
+      if (!interviewerName) {
+        showAlert('Please enter your name', 'error');
+        return;
+      }
+  
+      if (overallRating === 0) {
+        showAlert('Please provide an overall star rating', 'error');
+        return;
+      }
+  
+      const recommendationEl = document.querySelector('input[name="recommendation"]:checked');
+      if (!recommendationEl) {
+        showAlert('Please choose a recommendation option', 'error');
+        return;
+      }
+  
+      const token = getToken();
+      if (!token) {
+        showAlert('Not authenticated. Please log in.', 'error');
+        return;
+      }
+  
+      // Build feedback payload
+      const payload = {
+        interview_id: selectedInterview.id,
+        candidate_id: selectedInterview.candidate_id || selectedInterview.candidateId || null,
+        candidate_name: selectedInterview.candidate_name || `${selectedInterview.first_name || ''} ${selectedInterview.last_name || ''}`.trim(),
+        position: selectedInterview.position || '',
+        interviewer_name: interviewerName,
+        technical_skills: parseInt(document.getElementById('technicalSkills').value || 0),
+        technical_comments: document.getElementById('technicalComments').value.trim() || null,
+        communication_skills: parseInt(document.getElementById('communicationSkills').value || 0),
+        communication_comments: document.getElementById('communicationComments').value.trim() || null,
+        problem_solving: parseInt(document.getElementById('problemSolving').value || 0),
+        problem_solving_comments: document.getElementById('problemComments').value.trim() || null,
+        cultural_fit: parseInt(document.getElementById('culturalFit').value || 0),
+        cultural_fit_comments: document.getElementById('cultureComments').value.trim() || null,
+        leadership_potential: parseInt(document.getElementById('leadershipPotential').value || 0),
+        leadership_comments: document.getElementById('leadershipComments').value.trim() || null,
+        overall_rating: overallRating,
+        strengths: document.getElementById('strengths').value.trim() || null,
+        weaknesses: document.getElementById('weaknesses').value.trim() || null,
+        additional_notes: document.getElementById('additionalNotes').value.trim() || null,
+        recommendation: recommendationEl.value,
+        requires_followup: document.getElementById('requiresFollowup').checked ? 1 : 0,
+        followup_notes: document.getElementById('followupNotes').value.trim() || null
+      };
+  
+      // Basic validation for numeric ranges (just in case)
+      const checks = [
+        { val: payload.technical_skills, min: 0, max: 10, name: 'Technical Skills' },
+        { val: payload.communication_skills, min: 0, max: 10, name: 'Communication Skills' },
+        { val: payload.problem_solving, min: 0, max: 10, name: 'Problem Solving' },
+        { val: payload.cultural_fit, min: 0, max: 10, name: 'Cultural Fit' },
+        { val: payload.leadership_potential, min: 0, max: 10, name: 'Leadership Potential' }
+      ];
+      for (const c of checks) {
+        if (isNaN(c.val) || c.val < c.min || c.val > c.max) {
+          showAlert(`${c.name} must be between ${c.min} and ${c.max}`, 'error');
+          return;
+        }
+      }
+      if (isNaN(payload.overall_rating) || payload.overall_rating < 1 || payload.overall_rating > 5) {
+        showAlert('Overall rating must be between 1 and 5 stars', 'error');
+        return;
+      }
+  
+      // Disable submit UI while sending
+      const submitBtn = document.getElementById('submitBtn');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Submitting...';
+  
+      try {
+        const res = await fetch(`${API_URL}/feedback`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(payload)
+        });
+  
+        if (!res.ok) {
+          const errText = await res.text().catch(()=>null);
+          throw new Error(errText || 'Server returned an error while submitting feedback');
+        }
+  
+        const data = await res.json();
+        showAlert('Feedback submitted successfully!', 'success', 4000);
+  
+        // Remove the submitted interview from dropdown to avoid duplicate submissions
+        removeSubmittedInterview(selectedInterview.id);
+        // Clear selected interview and form
+        selectedInterview = null;
+        resetFormFields();
+        hideInterviewDetails();
+  
+        // Refresh feedback list cached & view if currently open
+        await loadAllFeedback();
+  
+      } catch (err) {
+        console.error('Error submitting feedback:', err);
+        showAlert('Failed to submit feedback. Check console for details.', 'error', 6000);
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = '📤 Submit Feedback';
+      }
+    }
+  
+    function removeSubmittedInterview(interviewId) {
+      const select = document.getElementById('interviewSelect');
+      if (!select) return;
+      const option = select.querySelector(`option[value="${interviewId}"]`);
+      if (option) option.remove();
+      // Also remove from stored __interviews
+      if (select.__interviews) {
+        select.__interviews = select.__interviews.filter(i => i.id != interviewId);
+      }
+    }
+  
+    function resetFormFields() {
+      // Reset sliders to 5
+      ['technicalSkills','communicationSkills','problemSolving','culturalFit','leadershipPotential'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = 5;
+      });
+      // Update slider displays
+      document.getElementById('techValue').textContent = 5;
+      document.getElementById('commValue').textContent = 5;
+      document.getElementById('problemValue').textContent = 5;
+      document.getElementById('cultureValue').textContent = 5;
+      document.getElementById('leadershipValue').textContent = 5;
+      updateTotalScore();
+  
+      // Clear textareas and inputs
+      ['technicalComments','communicationComments','problemComments','cultureComments','leadershipComments','strengths','weaknesses','additionalNotes','followupNotes','interviewerName'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+      });
+  
+      // Reset stars
+      overallRating = 0;
+      updateStars();
+  
+      // Clear recommendation selection
+      document.querySelectorAll('input[name="recommendation"]').forEach(i => i.checked = false);
+      document.querySelectorAll('.recommendation-option').forEach(r => r.classList.remove('selected'));
+  
+      // Uncheck followup
+      const cb = document.getElementById('requiresFollowup');
+      if (cb) cb.checked = false;
+      const notesCont = document.getElementById('followupNotesContainer');
+      if (notesCont) notesCont.style.display = 'none';
+    }
+  
+    // View feedback: fetch and render
+    async function loadAllFeedback() {
+      const token = getToken();
+      const container = document.getElementById('feedbackList');
+      container.innerHTML = '<div class="loading">Loading feedback...</div>';
+  
+      if (!token) {
+        container.innerHTML = '<div class="empty-state">Please log in to view feedback.</div>';
+        return;
+      }
+  
+      try {
+        const res = await fetch(`${API_URL}/feedback`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+  
+        if (!res.ok) {
+          throw new Error('Failed to fetch feedback');
+        }
+  
+        const feedback = await res.json();
+        allFeedback = Array.isArray(feedback) ? feedback : [];
+        if (allFeedback.length === 0) {
+          container.innerHTML = '<div class="empty-state">No feedback submitted yet.</div>';
+          return;
+        }
+        renderFeedbackList(allFeedback);
+      } catch (err) {
+        console.error('Error loading feedback:', err);
+        container.innerHTML = '<div class="empty-state">Error loading feedback. Check console.</div>';
+      }
+    }
+  
+    function filterFeedbackByName(name) {
+      if (!name) return allFeedback;
+      const q = name.toLowerCase();
+      return allFeedback.filter(f => (f.candidate_name || '').toLowerCase().includes(q));
+    }
+  
+    function renderFeedbackList(list) {
+      const container = document.getElementById('feedbackList');
+      if (!container) return;
+  
+      if (!list || list.length === 0) {
+        container.innerHTML = '<div class="empty-state">No feedback matches your search.</div>';
+        return;
+      }
+  
+      container.innerHTML = list.map(f => {
+        const date = f.created_at ? new Date(f.created_at).toLocaleString() : (f.interview_date ? new Date(f.interview_date).toLocaleString() : '-');
+        // build small scores grid
+        const technical = safeNum(f.technical_skills);
+        const communication = safeNum(f.communication_skills);
+        const problem = safeNum(f.problem_solving);
+        const culture = safeNum(f.cultural_fit);
+        const leadership = safeNum(f.leadership_potential);
+        const overall = safeNum(f.overall_rating);
+        const recommendationLabel = humanRecommendation(f.recommendation);
+  
+        return `
+          <div class="feedback-card">
+            <div class="feedback-header">
+              <div>
+                <div class="feedback-candidate">${escapeHtml(f.candidate_name || 'Candidate')}</div>
+                <div style="color:#666; font-size:14px;">${escapeHtml(f.position || '')}</div>
+              </div>
+              <div style="text-align:right;">
+                <div class="feedback-date">${escapeHtml(date)}</div>
+                <div style="margin-top:8px; font-weight:700; color:#333;">${overall} ★</div>
+                <div style="font-size:12px; color:#666;">${escapeHtml(recommendationLabel)}</div>
+              </div>
+            </div>
+  
+            <div class="feedback-scores">
+              <div class="score-item"><div class="score-name">Technical</div><div class="score-number">${technical}</div></div>
+              <div class="score-item"><div class="score-name">Communication</div><div class="score-number">${communication}</div></div>
+              <div class="score-item"><div class="score-name">Problem Solving</div><div class="score-number">${problem}</div></div>
+              <div class="score-item"><div class="score-name">Cultural Fit</div><div class="score-number">${culture}</div></div>
+              <div class="score-item"><div class="score-name">Leadership</div><div class="score-number">${leadership}</div></div>
+            </div>
+  
+            <div style="margin-top:12px;">
+              ${f.technical_comments ? `<div style="margin-bottom:8px;"><strong>Technical Comments:</strong> ${escapeHtml(f.technical_comments)}</div>` : ''}
+              ${f.communication_comments ? `<div style="margin-bottom:8px;"><strong>Communication Comments:</strong> ${escapeHtml(f.communication_comments)}</div>` : ''}
+              ${f.problem_solving_comments ? `<div style="margin-bottom:8px;"><strong>Problem Solving Comments:</strong> ${escapeHtml(f.problem_solving_comments)}</div>` : ''}
+              ${f.cultural_fit_comments ? `<div style="margin-bottom:8px;"><strong>Cultural Fit Comments:</strong> ${escapeHtml(f.cultural_fit_comments)}</div>` : ''}
+              ${f.leadership_comments ? `<div style="margin-bottom:8px;"><strong>Leadership Comments:</strong> ${escapeHtml(f.leadership_comments)}</div>` : ''}
+              ${f.strengths ? `<div style="margin-bottom:8px;"><strong>Strengths:</strong> ${escapeHtml(f.strengths)}</div>` : ''}
+              ${f.weaknesses ? `<div style="margin-bottom:8px;"><strong>Weaknesses:</strong> ${escapeHtml(f.weaknesses)}</div>` : ''}
+              ${f.additional_notes ? `<div style="margin-bottom:8px;"><strong>Notes:</strong> ${escapeHtml(f.additional_notes)}</div>` : ''}
+              ${f.requires_followup ? `<div style="margin-top:10px; padding:10px; background:#fff3cd; border-radius:8px;"><strong>Follow-up required:</strong> ${escapeHtml(f.followup_notes || 'No details provided')}</div>` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+  
+    // Small helpers
+    function safeNum(v) {
+      if (v === null || v === undefined) return '-';
+      return String(v);
+    }
+  
+    function humanRecommendation(key) {
+      if (!key) return 'No recommendation';
+      const map = {
+        'strongly_recommend': 'Strongly Recommend',
+        'recommend': 'Recommend',
+        'neutral': 'Neutral',
+        'not_recommend': 'Not Recommend',
+        'strongly_not_recommend': 'Strongly Not Recommend'
+      };
+      return map[key] || key;
+    }
+  
+    // Basic HTML escaping to avoid injection when rendering server-provided data
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+  
+    // If the user types search text, call this to update list
+    // (the search input listener was registered on DOMContentLoaded)
+    function onSearchFeedbackChange(value) {
+      renderFeedbackList(filterFeedbackByName(value));
+    }
+  
+    // If feedback loading fails to find candidate names, try candidateId route (optional)
+    async function getFeedbackByCandidate(candidateId) {
+      const token = getToken();
+      if (!token) return [];
+      try {
+        const res = await fetch(`${API_URL}/feedback/candidate/${candidateId}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) return [];
+        const data = await res.json();
+        return Array.isArray(data) ? data : [];
+      } catch (e) {
+        console.error(e);
+        return [];
+      }
+    }
+  
+  </script>
+</body>
+</html>  

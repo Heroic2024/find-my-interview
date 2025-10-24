@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interview Report</title>
+  <link rel="stylesheet" href="HR Feeback Report.css">
+</head>
+<body>
+  <div class="report-container">
+    <h1>Interview Report</h1>
+
+    <form class="report-form">
+
+      <!-- Candidate Info -->
+      <section>
+        <h2>Candidate Information</h2>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="candidateName">Candidate Name</label>
+            <input type="text" id="candidateName" name="candidateName" required>
+          </div>
+          <div class="form-group">
+            <label for="position">Position Applied</label>
+            <input type="text" id="position" name="position" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="interviewerName">Interviewer</label>
+            <input type="text" id="interviewerName" name="interviewerName" required>
+          </div>
+          <div class="form-group">
+            <label for="interviewDate">Date</label>
+            <input type="date" id="interviewDate" name="interviewDate" required>
+          </div>
+        </div>
+      </section>
+
+      <!-- Summary -->
+      <section>
+        <h2>Interview Summary</h2>
+        <textarea id="summary" name="summary" rows="4" placeholder="Write a short summary of the interview..." required></textarea>
+      </section>
+
+      <!-- Evaluation -->
+      <section>
+        <h2>Evaluation Metrics (1–10)</h2>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="technical">Technical Knowledge</label>
+            <input type="number" id="technical" name="technical" min="1" max="10" required>
+          </div>
+          <div class="form-group">
+            <label for="communication">Communication</label>
+            <input type="number" id="communication" name="communication" min="1" max="10" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="problem">Problem-Solving</label>
+            <input type="number" id="problem" name="problem" min="1" max="10" required>
+          </div>
+          <div class="form-group">
+            <label for="confidence">Confidence</label>
+            <input type="number" id="confidence" name="confidence" min="1" max="10" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="culture">Culture Fit</label>
+            <input type="number" id="culture" name="culture" min="1" max="10" required>
+          </div>
+        </div>
+      </section>
+
+      <!-- Strengths & Weaknesses -->
+      <section>
+        <h2>Strengths & Weaknesses</h2>
+        <div class="form-row">
+          <div class="form-group full-width">
+            <label for="strengths">Key Strengths</label>
+            <textarea id="strengths" name="strengths" rows="3" placeholder="Highlight candidate's strong points..." required></textarea>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group full-width">
+            <label for="weaknesses">Areas for Improvement</label>
+            <textarea id="weaknesses" name="weaknesses" rows="3" placeholder="Mention weaknesses or improvement areas..." required></textarea>
+          </div>
+        </div>
+      </section>
+
+      <!-- Decision -->
+      <section>
+        <h2>Final Decision</h2>
+        <div class="decision-options">
+          <label class="approved"><input type="radio" name="decision" value="approved" required> ✅ Approved</label>
+          <label class="on-hold"><input type="radio" name="decision" value="on-hold"> ⏳ On Hold</label>
+          <label class="rejected"><input type="radio" name="decision" value="rejected"> ❌ Rejected</label>
+        </div>
+      </section>
+
+      <!-- Notes -->
+      <section>
+        <h2>Final Notes & Recommendations</h2>
+        <textarea id="notes" name="notes" rows="3" placeholder="Any additional comments or recommendations..."></textarea>
+      </section>
+
+      <!-- Submit -->
+      <div class="form-group">
+        <button type="submit" class="submit-btn">Save Report</button>
+      </div>
+
+    </form>
+  </div>
+</body>
+</html>

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Interview Manager</title>
+        <link rel="stylesheet" href="dashboard.css">
+        <script src = "dashboard.js"></script>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h2>Dashboard</h2>
+                <p>Streamline your recruitment process</p>
+            </div>
+
+            <div class="nav-tabs">
+                <button class="tab-btn active" onclick="showTab('add-interview')">Add Interview</button>
+                <button class="tab-btn" onclick="showTab('manage-interviews')">Manage Interviews</button>
+                <button class="tab-btn" onclick="showTab('dashboard')">Dashboard</button>
+            </div>
+
+            <div id="add-interview" class="tab-content">
+                <h2 style="margin-bottom: 25px; color: #333;">Schedule New Interview</h2>
+                <div id="form-error" class="error-message hidden"></div>
+                <form id="interview-form">
+                    <div class="form-container">
+                        <div>
+                            <div class="form-group">
+                                <label for="candidate-name">Candidate Name *</label>
+                                <input type="text" id="candidate-name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="candidate-email">Email *</label>
+                                <input type="email" id="candidate-email" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="candidate-phone">Phone</label>
+                                <input type="tel" id="candidate-phone">
+                            </div>
+                        </div>
+                        <div>
+                            <div class="form-group">
+                                <label for="position">Position *</label>
+                                <input type="text" id="position" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="interview-date">Interview Date *</label>
+                                <input type="datetime-local" id="interview-date" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="interviewer">Interviewer *</label>
+                                <input type="text" id="interviewer" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="notes">Notes</label>
+                        <textarea id="notes" rows="4" placeholder="Additional notes about the candidate or interview..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary" id="submit-btn">
+                        <span class="btn-text">Schedule Interview</span>
+                    </button>
+                </form>
+            </div>
+
+            <div id="manage-interviews" class="tab-content hidden">
+                <h2 style="margin-bottom: 25px; color: #333;">Interview Management</h2>
+                
+                <div class="search-filter">
+                    <div class="search-box">
+                        <input type="text" id="search-input" placeholder="Search by candidate name, position, or interviewer..." style="margin: 0;">
+                    </div>
+                    <select id="status-filter">
+                        <option value="">All Status</option>
+                        <option value="scheduled">Scheduled</option>
+                        <option value="completed">Completed</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+                </div>
+
+                <div id="interviews-list">
+                    <div class="empty-state">
+                        <h3>Loading interviews...</h3>
+                        <div class="loading"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="dashboard" class="tab-content hidden">
+                <h2 style="margin-bottom: 25px; color: #333;">Dashboard</h2>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number" id="total-interviews">-</div>
+                        <div class="stat-label">Total Interviews</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="scheduled-count">-</div>
+                        <div class="stat-label">Scheduled</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="completed-count">-</div>
+                        <div class="stat-label">Completed</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="this-week-count">-</div>
+                        <div class="stat-label">This Week</div>
+                    </div>
+                </div>
+
+                <h3 style="margin-bottom: 20px; color: #333;">Upcoming Interviews</h3>
+                <div id="upcoming-interviews">
+                    <div class="empty-state">
+                        <h3>Loading upcoming interviews...</h3>
+                        <div class="loading"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Company Login - Interview Manager</title>
+  <link rel="stylesheet" href="company_register.css" />
+</head>
+<body>
+  <div class="container">
+    <!-- Left branding section (reuse) -->
+    <div class="branding">
+      <h1>Welcome Back</h1>
+      <p>Access your HR dashboard to manage interviews, evaluate candidates, and more.</p>
+      <img src="interview2.jpg" alt="Login Illustration" />
+    </div>
+
+    <!-- Right form section -->
+    <div class="form-section">
+      <h2>Company Login</h2>
+      <p class="subtitle">Enter your credentials to continue</p>
+
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="officialEmail">Official Email</label>
+          <input type="email" id="officialEmail" name="officialEmail" required placeholder="Enter official email" />
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" required placeholder="Enter password" />
+        </div>
+
+        <button type="submit" class="submit-btn">Login</button>
+      </form>
+
+      <div id="loginMessage" style="margin-top:1rem;"></div>
+
+      <p class="switch-link">
+        New here? <a href="company_register.html">Register your company</a>
+      </p>
+    </div>
+  </div>
+
+  <script src="company_login.js"></script>
+</body>
+</html>
