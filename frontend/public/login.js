@@ -40,7 +40,7 @@ window.onload = () => {
       if (role === "hr") {
         window.location.href = "HR_HomePage.html";
       } else {
-        window.location.href = "candidate_landing_page.html";
+        window.location.href = "/candidateLanding";
       }
 
     } catch (err) {

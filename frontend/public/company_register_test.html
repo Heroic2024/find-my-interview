@@ -90,39 +90,41 @@
       <div id="message" style="margin-top:1rem;"></div>
 
       <p class="switch-link">
-        Already registered? <a href="login.html">Login here</a>
+        Already registered? <a href="company_login.html">Login here</a>
       </p>
     </div>
   </div>
 
   <!-- Keep the original inline JS logic -->
-  <script>
-    const form = document.getElementById('companyForm');
-    const message = document.getElementById('message');
+  
+  <script src="company_register_test.js"></script>
 
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
+   <!--  /* const form = document.getElementById('companyForm');
+      const message = document.getElementById('message');
 
-      // Convert form data to URL-encoded string
-      const data = new URLSearchParams(new FormData(form));
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
 
-      fetch('/', {
-        method: 'POST',
-        body: data
-      })
-      .then(res => res.text())
-      .then(data => {
-        message.innerText = data;
-        message.style.color = 'green';
-        form.reset();
-      })
-      .catch(err => {
-        message.innerText = 'Registration failed!';
-        message.style.color = 'red';
-        console.error(err);
-      });
-    });
-  </script>
+        // Convert form data to URL-encoded string
+        const data = new URLSearchParams(new FormData(form));
+
+        fetch('/', {
+          method: 'POST',
+          body: data
+        })
+          .then(res => res.text())
+          .then(data => {
+            message.innerText = data;
+            message.style.color = 'green';
+            form.reset();
+          })
+          .catch(err => {
+            message.innerText = 'Registration failed!';
+            message.style.color = 'red';
+            console.error(err);
+          });
+      }); */ -->
+
 </body>
 </html>
  

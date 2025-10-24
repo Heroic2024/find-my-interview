@@ -123,4 +123,168 @@ async function insertCompany(companyData) {
     return result;
   }
 
-module.exports = {testConnection, insertCandidate, verifyCandidate, insertCompany};
+async function verifyCompany({ officialEmail, password }) {
+  const [rows] = await pool.execute('SELECT * FROM companies WHERE official_email = ?', [officialEmail]);
+  if (rows.length === 0) return null;
+
+  const company = rows[0];
+  const match = await bcrypt.compare(password, company.password_hash);
+  if (!match) return null;
+
+  return company;
+}
+
+async function getAllCandidates() {
+  const [rows] = await pool.query('SELECT * FROM candidates ORDER BY id DESC');
+  return rows;
+}
+
+async function query(sql, params) {
+  const [rows] = await pool.query(sql, params);
+  return rows;
+}
+
+async function getCompanyInterviews(companyId) {
+  const [rows] = await pool.query(`
+    SELECT 
+      i.*,
+      c.first_name as candidate_first_name,
+      c.last_name as candidate_last_name,
+      c.email as candidate_email,
+      c.phone as candidate_phone,
+      p.title as position_title,
+      r.name as round_name,
+      e1.first_name as interviewer1_first_name,
+      e1.last_name as interviewer1_last_name,
+      e2.first_name as interviewer2_first_name,
+      e2.last_name as interviewer2_last_name,
+      e3.first_name as interviewer3_first_name,
+      e3.last_name as interviewer3_last_name
+    FROM interviews i
+    JOIN candidates c ON i.candidate_id = c.id
+    JOIN positions p ON i.position_id = p.id
+    JOIN rounds r ON i.round_id = r.id
+    JOIN employees e1 ON i.interviewer_id_1 = e1.id
+    LEFT JOIN employees e2 ON i.interviewer_id_2 = e2.id
+    LEFT JOIN employees e3 ON i.interviewer_id_3 = e3.id
+    WHERE i.company_id = ?
+    ORDER BY i.interview_date DESC
+  `, [companyId]);
+  return rows;
+}
+
+// Create new interview
+async function createInterview(interviewData) {
+  const [result] = await pool.query(`
+    INSERT INTO interviews (
+      company_id,
+      candidate_id,
+      position_id,
+      interviewer_id_1,
+      interviewer_id_2,
+      interviewer_id_3,
+      round_id,
+      interview_date,
+      interview_link,
+      interview_location,
+      notes,
+      status
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `, [
+    interviewData.company_id,
+    interviewData.candidate_id,
+    interviewData.position_id,
+    interviewData.interviewer_id_1,
+    interviewData.interviewer_id_2 || null,
+    interviewData.interviewer_id_3 || null,
+    interviewData.round_id,
+    interviewData.interview_date,
+    interviewData.interview_link || null,
+    interviewData.interview_location || null,
+    interviewData.notes || null,
+    interviewData.status || 'scheduled'
+  ]);
+  return result;
+}
+
+// Update interview status
+async function updateInterviewStatus(interviewId, status) {
+  const [result] = await pool.query(
+    'UPDATE interviews SET status = ? WHERE id = ?',
+    [status, interviewId]
+  );
+  return result;
+}
+
+// Get positions for a company
+async function getCompanyPositions(companyId) {
+  const [rows] = await pool.query(`
+    SELECT p.* 
+    FROM positions p
+    JOIN departments d ON p.department_id = d.id
+    WHERE d.company_id = ?
+  `, [companyId]);
+  return rows;
+}
+
+// Get employees (interviewers) for a company
+async function getCompanyEmployees(companyId) {
+  const [rows] = await pool.query(
+    'SELECT * FROM employees WHERE company_id = ? AND role = "interviewer"',
+    [companyId]
+  );
+  return rows;
+}
+
+// Get all rounds
+async function getAllRounds() {
+  const [rows] = await pool.query('SELECT * FROM rounds ORDER BY id');
+  return rows;
+}
+
+// Save company note
+async function saveCompanyNote(companyId, noteText) {
+  const [result] = await pool.query(
+    'INSERT INTO company_notes (company_id, note_text) VALUES (?, ?)',
+    [companyId, noteText]
+  );
+  return result;
+}
+
+// Get company notes
+async function getCompanyNotes(companyId) {
+  const [rows] = await pool.query(
+    'SELECT * FROM company_notes WHERE company_id = ? ORDER BY created_at DESC',
+    [companyId]
+  );
+  return rows;
+}
+
+// Delete company note
+async function deleteCompanyNote(noteId, companyId) {
+  const [result] = await pool.query(
+    'DELETE FROM company_notes WHERE id = ? AND company_id = ?',
+    [noteId, companyId]
+  );
+  return result;
+}
+
+// Update the module.exports
+module.exports = { 
+  testConnection, 
+  insertCandidate, 
+  verifyCandidate, 
+  insertCompany, 
+  verifyCompany, 
+  query,
+  getAllCandidates,
+  getCompanyInterviews,
+  createInterview,
+  updateInterviewStatus,
+  getCompanyPositions,
+  getCompanyEmployees,
+  getAllRounds,
+  saveCompanyNote,
+  getCompanyNotes,
+  deleteCompanyNote
+};

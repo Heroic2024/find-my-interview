@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HR Dashboard</title>
+  <link rel="stylesheet" href="HR_HomePage.css">
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="company-logo" id="navCompanyName">Loading...</div>
+    <ul class="nav-links">
+      <li><a href="#home">Home</a></li>
+      <li><a href="#interviews">Interview Manager</a></li>
+      <li><a href="#candidates">Candidate List</a></li>
+      <li><a href="#notes">Notes/Calendar</a></li>
+      <li><a href="#contact">Contact Us</a></li>
+    </ul>
+  </nav>
+
+  <div class="dashboard-container">
+    <!-- Welcome Section -->
+    <section class="welcome-section">
+      <div class="company-info">
+        <div class="company-avatar" id="companyInitials">C</div>
+        <div class="company-details">
+          <h2 id="welcomeCompanyName">Loading...</h2>
+          <p><strong>Industry:</strong> <span id="companyIndustry">-</span></p>
+          <p><strong>Email:</strong> <span id="companyEmail">-</span></p>
+          <p><strong>Contact:</strong> <span id="companyContact">-</span></p>
+        </div>
+      </div>
+      <div class="vision-box">
+        <h3>Our Vision</h3>
+        <p>Streamlining recruitment processes and finding the best talent for our organization. We are committed to excellence in hiring and building a strong team for the future.</p>
+      </div>
+    </section>
+
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <h3>Total Candidates</h3>
+        <div class="number" id="totalCandidates">0</div>
+        <div class="label">Registered applicants</div>
+      </div>
+      <div class="stat-card">
+        <h3>Active Positions</h3>
+        <div class="number" id="activePositions">0</div>
+        <div class="label">Open roles</div>
+      </div>
+      <div class="stat-card">
+        <h3>Pending Interviews</h3>
+        <div class="number" id="pendingInterviews">0</div>
+        <div class="label">Scheduled this week</div>
+      </div>
+      <div class="stat-card">
+        <h3>Feedback Pending</h3>
+        <div class="number" id="feedbackPending">0</div>
+        <div class="label">Awaiting review</div>
+      </div>
+    </div>
+
+    <!-- Interview Manager Section -->
+    <section class="manager-section" id="interviews">
+      <h2>Interview Manager Dashboard</h2>
+      <div class="action-buttons">
+        <button class="btn btn-primary" onclick="showFeedbackForm()">📝 Feedback Form</button>
+        <button class="btn btn-secondary" onclick="showScheduler()">📅 Interview Scheduler</button>
+      </div>
+      <p style="color: #666; margin-top: 10px;">Manage interview schedules, submit feedback, and track candidate progress through the hiring pipeline.</p>
+    </section>
+
+    <!-- Candidates Section -->
+    <section class="candidates-section" id="candidates">
+      <h2>Candidate/Applicants</h2>
+      <p style="color: #666; margin-bottom: 20px;">Dynamic candidate list from the database - showing all applicants for your company</p>
+      
+      <div class="search-filter">
+        <input type="text" id="searchInput" placeholder="🔍 Search by name, email, or position...">
+        <select id="positionFilter">
+          <option value="">All Positions</option>
+        </select>
+        <select id="statusFilter">
+          <option value="">All Status</option>
+          <option value="pending">Pending</option>
+          <option value="scheduled">Scheduled</option>
+          <option value="completed">Completed</option>
+        </select>
+      </div>
+
+      <div id="candidatesTableContainer">
+        <div class="loading">Loading candidates...</div>
+      </div>
+    </section>
+
+    <!-- Notes Section -->
+    <section class="notes-section" id="notes">
+      <h2>Dynamic Notes Section</h2>
+      <p style="color: #666; margin-bottom: 20px;">Company can type and make notes here or schedule on calendar</p>
+      
+      <textarea class="notes-input" id="noteInput" placeholder="Type your notes here..."></textarea>
+      <button class="btn btn-primary" onclick="saveNote()">💾 Save Note</button>
+      
+      <div class="notes-list" id="notesList">
+        <!-- Notes will be dynamically added here -->
+      </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="contact-section" id="contact">
+      <h2>Contact Us</h2>
+      <div class="contact-info">
+        <div class="contact-item">
+          <strong>Company Name</strong>
+          <span id="contactCompanyName">-</span>
+        </div>
+        <div class="contact-item">
+          <strong>Registration Number</strong>
+          <span id="contactRegNo">-</span>
+        </div>
+        <div class="contact-item">
+          <strong>GSTIN</strong>
+          <span id="contactGSTIN">-</span>
+        </div>
+        <div class="contact-item">
+          <strong>Email</strong>
+          <span id="contactEmail">-</span>
+        </div>
+        <div class="contact-item">
+          <strong>Website</strong>
+          <span id="contactWebsite">-</span>
+        </div>
+        <div class="contact-item">
+          <strong>Phone</strong>
+          <span id="contactPhone">-</span>
+        </div>
+        <div class="contact-item">
+          <strong>Company Size</strong>
+          <span id="contactSize">-</span>
+        </div>
+        <div class="contact-item">
+          <strong>Address</strong>
+          <span id="contactAddress">-</span>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Candidate Detail Modal -->
+  <div id="candidateModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>📋 Candidate Details</h2>
+        <button class="close-modal" onclick="closeModal()">&times;</button>
+      </div>
+      <div class="modal-body" id="modalBody">
+        <!-- Content will be dynamically inserted here -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="scheduleInterviewFromModal()">📅 Schedule Interview</button>
+        <button class="btn btn-primary" onclick="closeModal()">Close</button>
+      </div>
+    </div>
+  </div>
+  <script src="HR_HomePage.js"></script>

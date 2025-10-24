@@ -90,19 +90,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // try to POST to backend; fallback to showing collected data if request fails
     try {
+      alert("Submitting company registration...");
       const resp = await fetch('/api/companies/apply', {
         method: 'POST',
         body: formData
       });
 
       if (!resp.ok) {
+        alert("Company registration failed.");
         const err = await resp.json().catch(() => ({ error: 'Server error' }));
         message.innerText = 'Registration failed: ' + (err.error || resp.statusText);
         message.style.color = 'red';
         console.error('Company register error:', err);
         return;
       }
-
+      alert("Company registered successfully.");
       const result = await resp.json().catch(() => ({}));
       message.innerText = 'Company registered successfully';
       message.style.color = 'green';

@@ -9,6 +9,12 @@
   margin: 0;
 }
 
+.auth_subtitle {
+  color: #fff;
+  margin-bottom: 30px;
+  font-size: 1.2rem;
+}
+
 /* Role Selection */
 .role-container {
   background: #fff;
