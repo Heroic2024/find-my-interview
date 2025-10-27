@@ -91,6 +91,15 @@ app.get("/hrHomePage", (req, res) => {
   res.sendFile(path.join(PRIVATE_DIR, "HR_HomePage.html"));
 });
 
+app.get("/feedback", (req, res) => {
+  res.sendFile(path.join(PRIVATE_DIR, "feedback.html"));
+});
+
+app.get("/interviewScheduler", (req, res) => {
+  res.sendFile(path.join(PRIVATE_DIR, "interview_scheduler.html"));
+});
+
+
 
 // ==================== ROUTES END HERE ==================== //
 
@@ -289,6 +298,103 @@ app.get("/api/candidates", authenticateCompany, async (req, res) => {
   } catch (err) {
     console.error("❌ Error fetching candidates:", err);
     res.status(500).json({ error: "Failed to fetch candidates" });
+  }
+});
+
+// Get all interviews for a company
+app.get("/api/interviews", authenticateCompany, async (req, res) => {
+  try {
+    const companyId = req.company.companyId;
+    const interviews = await db.getCompanyInterviews(companyId);
+    res.json(interviews);
+  } catch (err) {
+    console.error("❌ Error fetching interviews:", err);
+    res.status(500).json({ error: "Failed to fetch interviews" });
+  }
+});
+
+// Create new interview
+app.post("/api/interviews", authenticateCompany, async (req, res) => {
+  try {
+    const companyId = req.company.companyId;
+    const interviewData = {
+      company_id: companyId,
+      ...req.body
+    };
+
+    const result = await db.createInterview(interviewData);
+    res.json({ message: "Interview scheduled successfully", id: result.insertId });
+  } catch (err) {
+    console.error("❌ Error creating interview:", err);
+    res.status(500).json({ error: "Failed to schedule interview" });
+  }
+});
+
+// Update interview status
+app.patch("/api/interviews/:id/status", authenticateCompany, async (req, res) => {
+  try {
+    const { status } = req.body;
+    await db.updateInterviewStatus(req.params.id, status);
+    res.json({ message: "Interview status updated" });
+  } catch (err) {
+    console.error("❌ Error updating interview:", err);
+    res.status(500).json({ error: "Failed to update interview" });
+  }
+});
+
+// Add these routes to your existing server.js
+
+// ==================== Feedback Routes ====================
+
+// Get interviews available for feedback
+app.get("/api/interviews/for-feedback", authenticateCompany, async (req, res) => {
+  try {
+    const companyId = req.company.companyId;
+    const interviews = await db.getInterviewsForFeedback(companyId);
+    res.json(interviews);
+  } catch (err) {
+    console.error("❌ Error fetching interviews for feedback:", err);
+    res.status(500).json({ error: "Failed to fetch interviews" });
+  }
+});
+
+// Submit feedback
+app.post("/api/feedback", authenticateCompany, async (req, res) => {
+  try {
+    const companyId = req.company.companyId;
+    const feedbackData = {
+      company_id: companyId,
+      ...req.body
+    };
+
+    const result = await db.submitFeedback(feedbackData);
+    res.json({ message: "Feedback submitted successfully", id: result.insertId });
+  } catch (err) {
+    console.error("❌ Error submitting feedback:", err);
+    res.status(500).json({ error: "Failed to submit feedback" });
+  }
+});
+
+// Get all feedback for company
+app.get("/api/feedback", authenticateCompany, async (req, res) => {
+  try {
+    const companyId = req.company.companyId;
+    const feedback = await db.getCompanyFeedback(companyId);
+    res.json(feedback);
+  } catch (err) {
+    console.error("❌ Error fetching feedback:", err);
+    res.status(500).json({ error: "Failed to fetch feedback" });
+  }
+});
+
+// Get feedback by candidate
+app.get("/api/feedback/candidate/:candidateId", authenticateCompany, async (req, res) => {
+  try {
+    const feedback = await db.getFeedbackByCandidate(req.params.candidateId);
+    res.json(feedback);
+  } catch (err) {
+    console.error("❌ Error fetching candidate feedback:", err);
+    res.status(500).json({ error: "Failed to fetch candidate feedback" });
   }
 });
 

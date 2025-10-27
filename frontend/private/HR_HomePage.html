@@ -63,7 +63,7 @@
 
     <!-- Interview Manager Section -->
     <section class="manager-section" id="interviews">
-      <h2>Interview Manager Dashboard</h2>
+      <h2>📋 Interview Manager Dashboard</h2>
       <div class="action-buttons">
         <button class="btn btn-primary" onclick="showFeedbackForm()">📝 Feedback Form</button>
         <button class="btn btn-secondary" onclick="showScheduler()">📅 Interview Scheduler</button>
@@ -73,7 +73,7 @@
 
     <!-- Candidates Section -->
     <section class="candidates-section" id="candidates">
-      <h2>Candidate/Applicants</h2>
+      <h2>👥 Candidate/Applicants</h2>
       <p style="color: #666; margin-bottom: 20px;">Dynamic candidate list from the database - showing all applicants for your company</p>
       
       <div class="search-filter">
@@ -83,9 +83,14 @@
         </select>
         <select id="statusFilter">
           <option value="">All Status</option>
-          <option value="pending">Pending</option>
-          <option value="scheduled">Scheduled</option>
-          <option value="completed">Completed</option>
+          <option value="applied">Applied</option>
+          <option value="interview scheduled">Interview Scheduled</option>
+          <option value="interview pending">Interview Pending</option>
+          <option value="feedback pending">Feedback Pending</option>
+          <option value="under review">Under Review</option>
+          <option value="selected">Selected</option>
+          <option value="rejected">Rejected</option>
+          <option value="interview canceled">Interview Canceled</option>
         </select>
       </div>
 
@@ -96,7 +101,7 @@
 
     <!-- Notes Section -->
     <section class="notes-section" id="notes">
-      <h2>Dynamic Notes Section</h2>
+      <h2>📝 Dynamic Notes Section</h2>
       <p style="color: #666; margin-bottom: 20px;">Company can type and make notes here or schedule on calendar</p>
       
       <textarea class="notes-input" id="noteInput" placeholder="Type your notes here..."></textarea>
@@ -109,7 +114,7 @@
 
     <!-- Contact Section -->
     <section class="contact-section" id="contact">
-      <h2>Contact Us</h2>
+      <h2>📞 Contact Us</h2>
       <div class="contact-info">
         <div class="contact-item">
           <strong>Company Name</strong>

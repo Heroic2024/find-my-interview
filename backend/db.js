@@ -269,7 +269,83 @@ async function deleteCompanyNote(noteId, companyId) {
   return result;
 }
 
-// Update the module.exports
+// Get all interviews for feedback dropdown (only completed interviews without feedback)
+async function getInterviewsForFeedback(companyId) {
+  const [rows] = await pool.query(`
+    SELECT i.*, c.first_name, c.last_name
+    FROM interviews i
+    JOIN candidates c ON i.candidate_id = c.id
+    LEFT JOIN interview_feedback f ON i.id = f.interview_id
+    WHERE i.company_id = ? 
+    AND i.status = 'completed'
+    AND f.id IS NULL
+    ORDER BY i.interview_date DESC
+  `, [companyId]);
+  return rows;
+}
+
+// Submit feedback
+async function submitFeedback(feedbackData) {
+  const [result] = await pool.query(`
+    INSERT INTO interview_feedback (
+      company_id, interview_id, candidate_id, candidate_name, position,
+      interviewer_name, interview_date, technical_skills, technical_comments,
+      communication_skills, communication_comments, problem_solving, 
+      problem_solving_comments, cultural_fit, cultural_fit_comments,
+      leadership_potential, leadership_comments, overall_rating,
+      strengths, weaknesses, additional_notes, recommendation,
+      requires_followup, followup_notes
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `, [
+    feedbackData.company_id,
+    feedbackData.interview_id,
+    feedbackData.candidate_id,
+    feedbackData.candidate_name,
+    feedbackData.position,
+    feedbackData.interviewer_name,
+    feedbackData.interview_date,
+    feedbackData.technical_skills,
+    feedbackData.technical_comments || null,
+    feedbackData.communication_skills,
+    feedbackData.communication_comments || null,
+    feedbackData.problem_solving,
+    feedbackData.problem_solving_comments || null,
+    feedbackData.cultural_fit,
+    feedbackData.cultural_fit_comments || null,
+    feedbackData.leadership_potential,
+    feedbackData.leadership_comments || null,
+    feedbackData.overall_rating,
+    feedbackData.strengths || null,
+    feedbackData.weaknesses || null,
+    feedbackData.additional_notes || null,
+    feedbackData.recommendation,
+    feedbackData.requires_followup || 0,
+    feedbackData.followup_notes || null
+  ]);
+  return result;
+}
+
+// Get all feedback for a company
+async function getCompanyFeedback(companyId) {
+  const [rows] = await pool.query(`
+    SELECT * FROM interview_feedback 
+    WHERE company_id = ?
+    ORDER BY created_at DESC
+  `, [companyId]);
+  return rows;
+}
+
+// Get feedback by candidate
+async function getFeedbackByCandidate(candidateId) {
+  const [rows] = await pool.query(`
+    SELECT * FROM interview_feedback 
+    WHERE candidate_id = ?
+    ORDER BY created_at DESC
+  `, [candidateId]);
+  return rows;
+}
+
+// Update module.exports to include these new functions
 module.exports = { 
   testConnection, 
   insertCandidate, 
@@ -281,10 +357,12 @@ module.exports = {
   getCompanyInterviews,
   createInterview,
   updateInterviewStatus,
-  getCompanyPositions,
-  getCompanyEmployees,
-  getAllRounds,
   saveCompanyNote,
   getCompanyNotes,
-  deleteCompanyNote
+  deleteCompanyNote,
+  getInterviewsForFeedback,
+  submitFeedback,
+  getCompanyFeedback,
+  getFeedbackByCandidate
 };
+
