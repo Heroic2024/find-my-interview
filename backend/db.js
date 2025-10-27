@@ -144,60 +144,43 @@ async function query(sql, params) {
   return rows;
 }
 
+// Get all interviews for a company
 async function getCompanyInterviews(companyId) {
   const [rows] = await pool.query(`
-    SELECT 
-      i.*,
-      c.first_name as candidate_first_name,
-      c.last_name as candidate_last_name,
-      c.email as candidate_email,
-      c.phone as candidate_phone,
-      p.title as position_title,
-      r.name as round_name,
-      e1.first_name as interviewer1_first_name,
-      e1.last_name as interviewer1_last_name,
-      e2.first_name as interviewer2_first_name,
-      e2.last_name as interviewer2_last_name,
-      e3.first_name as interviewer3_first_name,
-      e3.last_name as interviewer3_last_name
-    FROM interviews i
-    JOIN candidates c ON i.candidate_id = c.id
-    JOIN positions p ON i.position_id = p.id
-    JOIN rounds r ON i.round_id = r.id
-    JOIN employees e1 ON i.interviewer_id_1 = e1.id
-    LEFT JOIN employees e2 ON i.interviewer_id_2 = e2.id
-    LEFT JOIN employees e3 ON i.interviewer_id_3 = e3.id
-    WHERE i.company_id = ?
-    ORDER BY i.interview_date DESC
+    SELECT * FROM interviews
+    WHERE company_id = ?
+    ORDER BY interview_date DESC
   `, [companyId]);
   return rows;
 }
-
+ 
 // Create new interview
 async function createInterview(interviewData) {
   const [result] = await pool.query(`
     INSERT INTO interviews (
       company_id,
       candidate_id,
-      position_id,
-      interviewer_id_1,
-      interviewer_id_2,
-      interviewer_id_3,
-      round_id,
+      candidate_name,
+      position,
+      round,
+      interviewer_1,
+      interviewer_2,
+      interviewer_3,
       interview_date,
       interview_link,
       interview_location,
       notes,
       status
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `, [
     interviewData.company_id,
     interviewData.candidate_id,
-    interviewData.position_id,
-    interviewData.interviewer_id_1,
-    interviewData.interviewer_id_2 || null,
-    interviewData.interviewer_id_3 || null,
-    interviewData.round_id,
+    interviewData.candidate_name,
+    interviewData.position,
+    interviewData.round,
+    interviewData.interviewer_1,
+    interviewData.interviewer_2 || null,
+    interviewData.interviewer_3 || null,
     interviewData.interview_date,
     interviewData.interview_link || null,
     interviewData.interview_location || null,
@@ -206,16 +189,15 @@ async function createInterview(interviewData) {
   ]);
   return result;
 }
-
+ 
 // Update interview status
 async function updateInterviewStatus(interviewId, status) {
   const [result] = await pool.query(
-    'UPDATE interviews SET status = ? WHERE id = ?',
+    'UPDATE interviews SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
     [status, interviewId]
   );
   return result;
 }
-
 // Get positions for a company
 async function getCompanyPositions(companyId) {
   const [rows] = await pool.query(`
