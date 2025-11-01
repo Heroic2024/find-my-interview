@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Candidate Dashboard - Find My Interview</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-size: 28px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .logout-btn {
+            background: #ff4757;
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: #ff3838;
+            transform: translateY(-2px);
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card h3 {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-card .number {
+            font-size: 36px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        /* Main Content */
+        .dashboard-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+        }
+
+        .main-section {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+
+        .section-title {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            color: #666;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab:hover {
+            color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Interview Cards */
+        .interview-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+            transition: all 0.3s;
+        }
+
+        .interview-card:hover {
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transform: translateX(5px);
+        }
+
+        .interview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .interview-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .interview-status {
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .status-scheduled { background: #ffeaa7; color: #d63031; }
+        .status-completed { background: #55efc4; color: #00b894; }
+        .status-pending { background: #74b9ff; color: #0984e3; }
+        .status-canceled { background: #dfe6e9; color: #636e72; }
+
+        .interview-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .detail-item strong {
+            color: #333;
+        }
+
+        /* Profile Section */
+        .profile-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: white;
+            color: #667eea;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            font-weight: bold;
+            margin: 0 auto 15px;
+        }
+
+        .profile-card h2 {
+            margin-bottom: 5px;
+        }
+
+        .profile-card p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+
+        .action-btn {
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 10px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            font-size: 15px;
+        }
+
+        .action-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state svg {
+            width: 120px;
+            height: 120px;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+
+        .empty-state h3 {
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        /* Feedback Card */
+        .feedback-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border-left: 4px solid #00b894;
+        }
+
+        .feedback-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .rating-stars {
+            color: #ffc107;
+            font-size: 20px;
+        }
+
+        .feedback-section {
+            margin-bottom: 15px;
+        }
+
+        .feedback-section h4 {
+            color: #333;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .score-bar {
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 5px;
+        }
+
+        .score-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.3s;
+        }
+
+        .recommendation {
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .rec-strongly-recommend { background: #d4edda; color: #155724; }
+        .rec-recommend { background: #d1ecf1; color: #0c5460; }
+        .rec-neutral { background: #fff3cd; color: #856404; }
+        .rec-not-recommend { background: #f8d7da; color: #721c24; }
+
+        /* Loading Spinner */
+        .loading {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 968px) {
+            .dashboard-content {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .interview-details {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>📋 My Dashboard</h1>
+            <div class="user-info">
+                <span class="user-name" id="userName">Loading...</span>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Total Applications</h3>
+                <div class="number" id="totalApplications">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Scheduled Interviews</h3>
+                <div class="number" id="scheduledInterviews">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Completed Interviews</h3>
+                <div class="number" id="completedInterviews">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Feedback Received</h3>
+                <div class="number" id="feedbackReceived">0</div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="dashboard-content">
+            <!-- Main Section -->
+            <div class="main-section">
+                <h2 class="section-title">My Interview Journey</h2>
+                
+                <!-- Tabs -->
+                <div class="tabs">
+                    <button class="tab active" onclick="switchTab('upcoming')">Upcoming</button>
+                    <button class="tab" onclick="switchTab('completed')">Completed</button>
+                    <button class="tab" onclick="switchTab('feedback')">Feedback</button>
+                </div>
+
+                <!-- Upcoming Interviews Tab -->
+                <div id="upcoming-tab" class="tab-content active">
+                    <div id="upcomingInterviews" class="loading">
+                        <div class="spinner"></div>
+                        <p>Loading interviews...</p>
+                    </div>
+                </div>
+
+                <!-- Completed Interviews Tab -->
+                <div id="completed-tab" class="tab-content">
+                    <div id="completedInterviewsList" class="loading">
+                        <div class="spinner"></div>
+                        <p>Loading interviews...</p>
+                    </div>
+                </div>
+
+                <!-- Feedback Tab -->
+                <div id="feedback-tab" class="tab-content">
+                    <div id="feedbackList" class="loading">
+                        <div class="spinner"></div>
+                        <p>Loading feedback...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div>
+                <!-- Profile Card -->
+                <div class="profile-card">
+                    <div class="profile-avatar" id="avatarInitial">?</div>
+                    <h2 id="profileName">Loading...</h2>
+                    <p id="profileEmail">Loading...</p>
+                    <p id="profilePosition">Position</p>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="quick-actions">
+                    <h3 class="section-title">Quick Actions</h3>
+                    <button class="action-btn" onclick="updateProfile()">📝 Update Profile</button>
+                    <button class="action-btn" onclick="viewApplications()">📄 View Applications</button>
+                    <button class="action-btn" onclick="downloadResume()">⬇️ Download Resume</button>
+                    <button class="action-btn" onclick="contactSupport()">💬 Contact Support</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let candidateData = null;
+        let interviews = [];
+        let feedbackList = [];
+    
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', async () => {
+            const token = localStorage.getItem('candidateToken');
+            if (!token) {
+                alert('Please login first');
+                window.location.href = '/candidateLogin';
+                return;
+            }
+    
+            await loadCandidateData();
+            await loadInterviews();
+            await loadFeedback();
+            updateStats();
+        });
+    
+        // Load candidate data
+        async function loadCandidateData() {
+            try {
+                const token = localStorage.getItem('candidateToken');
+                const response = await fetch('/api/candidate/profile', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+    
+                if (!response.ok) throw new Error('Failed to load profile');
+    
+                candidateData = await response.json();
+                
+                // Update UI
+                document.getElementById('userName').textContent = `${candidateData.first_name} ${candidateData.last_name}`;
+                document.getElementById('profileName').textContent = `${candidateData.first_name} ${candidateData.last_name}`;
+                document.getElementById('profileEmail').textContent = candidateData.email;
+                document.getElementById('profilePosition').textContent = candidateData.position || 'Not specified';
+                
+                const initial = candidateData.first_name.charAt(0).toUpperCase();
+                document.getElementById('avatarInitial').textContent = initial;
+            } catch (error) {
+                console.error('Error loading candidate data:', error);
+                alert('Failed to load profile data');
+            }
+        }
+    
+        // Load interviews
+        async function loadInterviews() {
+            try {
+                const token = localStorage.getItem('candidateToken');
+                const response = await fetch('/api/candidate/interviews', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+    
+                if (!response.ok) throw new Error('Failed to load interviews');
+    
+                interviews = await response.json();
+                console.log('Interviews loaded:', interviews); // DEBUG
+                renderInterviews();
+                
+            } catch (error) {
+                console.error('Error loading interviews:', error);
+                document.getElementById('upcomingInterviews').innerHTML = `
+                    <div class="empty-state">
+                        <h3>Failed to load interviews</h3>
+                        <p>Please try refreshing the page</p>
+                    </div>
+                `;
+                document.getElementById('completedInterviews').innerHTML = `
+                    <div class="empty-state">
+                        <h3>Failed to load interviews</h3>
+                        <p>Please try refreshing the page</p>
+                    </div>
+                `;
+            }
+        }
+    
+        // Load feedback
+        async function loadFeedback() {
+            try {
+                const token = localStorage.getItem('candidateToken');
+                const response = await fetch('/api/candidate/feedback', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+    
+                if (!response.ok) throw new Error('Failed to load feedback');
+    
+                feedbackList = await response.json();
+                renderFeedback();
+            } catch (error) {
+                console.error('Error loading feedback:', error);
+                document.getElementById('feedbackList').innerHTML = `
+                    <div class="empty-state">
+                        <h3>No feedback yet</h3>
+                        <p>Feedback from your interviews will appear here</p>
+                    </div>
+                `;
+            }
+        }
+    
+        // Render interviews
+        function renderInterviews() {
+            const upcoming = interviews.filter(i => i.status === 'scheduled' || i.status === 'pending');
+            const completed = interviews.filter(i => i.status === 'completed');
+    
+            console.log('Upcoming:', upcoming.length, 'Completed:', completed.length); // DEBUG
+    
+            // Upcoming interviews
+            if (upcoming.length === 0) {
+                document.getElementById('upcomingInterviews').innerHTML = `
+                    <div class="empty-state">
+                        <h3>No upcoming interviews</h3>
+                        <p>You're all caught up!</p>
+                    </div>
+                `;
+            } else {
+                document.getElementById('upcomingInterviews').innerHTML = upcoming.map(interview => `
+                    <div class="interview-card">
+                        <div class="interview-header">
+                            <div class="interview-title">${interview.position}</div>
+                            <span class="interview-status status-${interview.status}">${interview.status}</span>
+                        </div>
+                        <div class="interview-details">
+                            <div class="detail-item">
+                                <strong>Company:</strong> ${interview.company_name || 'N/A'}
+                            </div>
+                            <div class="detail-item">
+                                <strong>Round:</strong> ${interview.round}
+                            </div>
+                            <div class="detail-item">
+                                <strong>Date:</strong> ${formatDate(interview.interview_date)}
+                            </div>
+                            <div class="detail-item">
+                                <strong>Time:</strong> ${formatTime(interview.interview_date)}
+                            </div>
+                            ${interview.interview_link ? `
+                                <div class="detail-item" style="grid-column: 1 / -1;">
+                                    <strong>Link:</strong> <a href="${interview.interview_link}" target="_blank">${interview.interview_link}</a>
+                                </div>
+                            ` : ''}
+                            ${interview.interview_location ? `
+                                <div class="detail-item" style="grid-column: 1 / -1;">
+                                    <strong>Location:</strong> ${interview.interview_location}
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `).join('');
+            }
+    
+            // Render completed tab (will be shown when user switches to it)
+            renderCompletedTab();
+        }
+        
+        // Separate function to render completed interviews
+        function renderCompletedTab() {
+            const completed = interviews.filter(i => i.status === 'completed');
+            console.log('Rendering completed tab, found:', completed.length); // DEBUG
+            
+            if (completed.length === 0) {
+                document.getElementById('completedInterviews').innerHTML = `
+                    <div class="empty-state">
+                        <h3>No completed interviews</h3>
+                        <p>Completed interviews will appear here</p>
+                    </div>
+                `;
+            } else {
+                document.getElementById('completedInterviewsList').innerHTML = completed.map(interview => `
+                    <div class="interview-card">
+                        <div class="interview-header">
+                            <div class="interview-title">${interview.position}</div>
+                            <span class="interview-status status-completed">completed</span>
+                        </div>
+                        <div class="interview-details">
+                            <div class="detail-item">
+                                <strong>Company:</strong> ${interview.company_name || 'N/A'}
+                            </div>
+                            <div class="detail-item">
+                                <strong>Round:</strong> ${interview.round}
+                            </div>
+                            <div class="detail-item">
+                                <strong>Date:</strong> ${formatDate(interview.interview_date)}
+                            </div>
+                            <div class="detail-item">
+                                <strong>Interviewer:</strong> ${interview.interviewer_1}
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+    
+        // Render feedback
+        function renderFeedback() {
+            if (feedbackList.length === 0) {
+                document.getElementById('feedbackList').innerHTML = `
+                    <div class="empty-state">
+                        <h3>No feedback yet</h3>
+                        <p>Feedback from your interviews will appear here</p>
+                    </div>
+                `;
+                return;
+            }
+    
+            document.getElementById('feedbackList').innerHTML = feedbackList.map(feedback => `
+                <div class="feedback-card">
+                    <div class="feedback-header">
+                        <div>
+                            <strong>${feedback.position}</strong>
+                            <p style="color: #666; font-size: 14px; margin-top: 5px;">
+                                by ${feedback.interviewer_name} • ${formatDate(feedback.interview_date)}
+                            </p>
+                        </div>
+                        <div class="rating-stars">
+                            ${'★'.repeat(feedback.overall_rating)}${'☆'.repeat(5 - feedback.overall_rating)}
+                        </div>
+                    </div>
+    
+                    <div class="feedback-section">
+                        <h4>Technical Skills (${feedback.technical_skills}/10)</h4>
+                        <div class="score-bar">
+                            <div class="score-fill" style="width: ${feedback.technical_skills * 10}%"></div>
+                        </div>
+                        ${feedback.technical_comments ? `<p style="color: #666; font-size: 13px;">${feedback.technical_comments}</p>` : ''}
+                    </div>
+    
+                    <div class="feedback-section">
+                        <h4>Communication Skills (${feedback.communication_skills}/10)</h4>
+                        <div class="score-bar">
+                            <div class="score-fill" style="width: ${feedback.communication_skills * 10}%"></div>
+                        </div>
+                        ${feedback.communication_comments ? `<p style="color: #666; font-size: 13px;">${feedback.communication_comments}</p>` : ''}
+                    </div>
+    
+                    <div class="feedback-section">
+                        <h4>Problem Solving (${feedback.problem_solving}/10)</h4>
+                        <div class="score-bar">
+                            <div class="score-fill" style="width: ${feedback.problem_solving * 10}%"></div>
+                        </div>
+                    </div>
+    
+                    ${feedback.strengths ? `
+                        <div class="feedback-section">
+                            <h4>Strengths</h4>
+                            <p style="color: #666; font-size: 13px;">${feedback.strengths}</p>
+                        </div>
+                    ` : ''}
+    
+                    ${feedback.weaknesses ? `
+                        <div class="feedback-section">
+                            <h4>Areas for Improvement</h4>
+                            <p style="color: #666; font-size: 13px;">${feedback.weaknesses}</p>
+                        </div>
+                    ` : ''}
+    
+                    <div class="recommendation rec-${feedback.recommendation.replace(/_/g, '-')}">
+                        ${feedback.recommendation.replace(/_/g, ' ').toUpperCase()}
+                    </div>
+                </div>
+            `).join('');
+        }
+    
+        // Update stats
+        function updateStats() {
+            document.getElementById('totalApplications').textContent = interviews.length;
+            document.getElementById('scheduledInterviews').textContent = 
+                interviews.filter(i => i.status === 'scheduled' || i.status === 'pending').length;
+            document.getElementById('completedInterviews').textContent = 
+                interviews.filter(i => i.status === 'completed').length;
+            document.getElementById('feedbackReceived').textContent = feedbackList.length;
+        }
+    
+        // Switch tabs
+        function switchTab(tab) {
+            // Remove active class from all tabs and contents
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    
+            // Add active class to selected tab
+            event.target.classList.add('active');
+            document.getElementById(`${tab}-tab`).classList.add('active');
+            
+            // Force re-render of completed tab if switching to it
+            if (tab === 'completed') {
+                renderCompletedTab();
+            }
+        }
+    
+        // Utility functions
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric' 
+            });
+        }
+    
+        function formatTime(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleTimeString('en-US', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+        }
+    
+        // Quick actions
+        function updateProfile() {
+            alert('Profile update feature coming soon!');
+        }
+    
+        function viewApplications() {
+            alert('Applications view coming soon!');
+        }
+    
+        function downloadResume() {
+            if (candidateData && candidateData.resume_file_name) {
+                alert('Resume download feature coming soon!');
+            } else {
+                alert('No resume uploaded yet');
+            }
+        }
+    
+        function contactSupport() {
+            alert('Support: support@findmyinterview.com');
+        }
+    
+        function logout() {
+            localStorage.removeItem('candidateToken');
+            window.location.href = '/candidateLogin';
+        }
+    </script>
+</body>
+</html>

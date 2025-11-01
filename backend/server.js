@@ -404,11 +404,109 @@ function generateToken(user) {
     return jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: '8h' });
 }
 
+// Add these routes to your server.js file
+
+// ==================== JWT Token Generation ====================
+// Keep this one (the correct one)
+function generateToken(user) {
+  return jwt.sign(
+    { userId: user.id, email: user.email },
+    JWT_SECRET,
+    { expiresIn: "8h" }
+  );
+}
+
+// ==================== Candidate Authentication Middleware ====================
+function authenticateCandidate(req, res, next) {
+  const authHeader = req.headers['authorization'];
+  if (!authHeader) return res.status(401).json({ error: "No token provided" });
+
+  const token = authHeader.split(' ')[1];
+  if (!token) return res.status(401).json({ error: "Invalid token" });
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.candidate = decoded; // attach decoded candidate info to request
+    next();
+  } catch (err) {
+    return res.status(403).json({ error: "Token invalid or expired" });
+  }
+}
+
+// ==================== Candidate Dashboard Routes ====================
+
+// GET candidate profile
+app.get("/api/candidate/profile", authenticateCandidate, async (req, res) => {
+  try {
+    const candidateId = req.candidate.userId;
+    const candidate = await db.getCandidateById(candidateId);
+    
+    if (!candidate) {
+      return res.status(404).json({ error: "Candidate not found" });
+    }
+
+    res.json(candidate);
+  } catch (err) {
+    console.error("❌ Error fetching candidate profile:", err);
+    res.status(500).json({ error: "Failed to fetch profile" });
+  }
+});
+
+// GET candidate's interviews
+app.get("/api/candidate/interviews", authenticateCandidate, async (req, res) => {
+  try {
+    const candidateId = req.candidate.userId;
+    const interviews = await db.getCandidateInterviews(candidateId);
+    res.json(interviews);
+  } catch (err) {
+    console.error("❌ Error fetching candidate interviews:", err);
+    res.status(500).json({ error: "Failed to fetch interviews" });
+  }
+});
+
+// GET candidate's feedback
+app.get("/api/candidate/feedback", authenticateCandidate, async (req, res) => {
+  try {
+    const candidateId = req.candidate.userId;
+    const feedback = await db.getCandidateFeedback(candidateId);
+    res.json(feedback);
+  } catch (err) {
+    console.error("❌ Error fetching candidate feedback:", err);
+    res.status(500).json({ error: "Failed to fetch feedback" });
+  }
+});
+
+// UPDATE candidate profile
+app.put("/api/candidate/profile", authenticateCandidate, async (req, res) => {
+  try {
+    const candidateId = req.candidate.userId;
+    const updateData = req.body;
+    
+    await db.updateCandidateProfile(candidateId, updateData);
+    res.json({ message: "Profile updated successfully" });
+  } catch (err) {
+    console.error("❌ Error updating profile:", err);
+    res.status(500).json({ error: "Failed to update profile" });
+  }
+});
+
+// ==================== Candidate Login Page Route ====================
+app.get("/candidateLogin", (req, res) => {
+  res.sendFile(path.join(PUBLIC_DIR, "candidate_login.html"));
+});
+
+app.get("/candidateDashboard", (req, res) => {
+  res.sendFile(path.join(PUBLIC_DIR, "candidate_dashboard.html"));
+});
+
 // Fallback route for unknown endpoints
 app.use((req, res) => {
   res.status(404).send("Page not found");
 });
 
+app.get("/candidateDashboard", (req, res) => {
+  res.sendFile(path.join(PUBLIC_DIR, "candidate_dashboard.html"));
+});
 // Start server after verifying DB
 async function startServer() {
   await db.testConnection();

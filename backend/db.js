@@ -6,7 +6,7 @@ require('dotenv').config();
 const pool = mysql.createPool({
   host: process.env.DB_HOST || 'localhost',
   user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASS || 'root',
+  password: process.env.DB_PASS || 'Theo1000*',
   database: process.env.DB_NAME || 'recruitment_system'
 });
 
@@ -346,5 +346,100 @@ module.exports = {
   submitFeedback,
   getCompanyFeedback,
   getFeedbackByCandidate
+};
+
+// Add these functions to your db.js file
+
+// ==================== Candidate Dashboard Functions ====================
+
+// Get candidate by ID
+async function getCandidateById(candidateId) {
+  const [rows] = await pool.query(
+    'SELECT * FROM candidates WHERE id = ?',
+    [candidateId]
+  );
+  return rows[0] || null;
+}
+
+// Get all interviews for a specific candidate
+async function getCandidateInterviews(candidateId) {
+  const [rows] = await pool.query(`
+    SELECT 
+      i.*,
+      c.name as company_name
+    FROM interviews i
+    LEFT JOIN companies c ON i.company_id = c.id
+    WHERE i.candidate_id = ?
+    ORDER BY i.interview_date DESC
+  `, [candidateId]);
+  return rows;
+}
+
+// Get feedback for a specific candidate
+async function getCandidateFeedback(candidateId) {
+  const [rows] = await pool.query(`
+    SELECT * FROM interview_feedback
+    WHERE candidate_id = ?
+    ORDER BY created_at DESC
+  `, [candidateId]);
+  return rows;
+}
+
+// Update candidate profile
+async function updateCandidateProfile(candidateId, updateData) {
+  const allowedFields = [
+    'first_name', 'last_name', 'phone', 'position',
+    'education', 'experience_years', 'skills', 'location', 'notes'
+  ];
+  
+  const updates = [];
+  const values = [];
+  
+  for (const field of allowedFields) {
+    if (updateData[field] !== undefined) {
+      updates.push(`${field} = ?`);
+      values.push(updateData[field]);
+    }
+  }
+  
+  if (updates.length === 0) {
+    throw new Error('No valid fields to update');
+  }
+  
+  values.push(candidateId);
+  
+  const [result] = await pool.query(
+    `UPDATE candidates SET ${updates.join(', ')} WHERE id = ?`,
+    values
+  );
+  
+  return result;
+}
+
+// ==================== Update module.exports ====================
+// Add these to your existing module.exports:
+module.exports = { 
+  testConnection, 
+  insertCandidate, 
+  verifyCandidate, 
+  insertCompany, 
+  verifyCompany, 
+  query,
+  getAllCandidates,
+  getCompanyInterviews,
+  createInterview,
+  updateInterviewStatus,
+  saveCompanyNote,
+  getCompanyNotes,
+  deleteCompanyNote,
+  getInterviewsForFeedback,
+  submitFeedback,
+  getCompanyFeedback,
+  getFeedbackByCandidate,
+  // NEW FUNCTIONS FOR CANDIDATE DASHBOARD:
+  getCandidateById,
+  getCandidateInterviews,
+  getCandidateFeedback,
+  updateCandidateProfile
 };
 
