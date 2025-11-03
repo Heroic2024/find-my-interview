@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Find My Interview</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-size: 28px;
+        }
+
+        .back-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+
+        .back-btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+
+        .settings-container {
+            display: grid;
+            gap: 25px;
+        }
+
+        .settings-card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .card-header .icon {
+            font-size: 32px;
+        }
+
+        .card-header h2 {
+            color: #333;
+            font-size: 22px;
+        }
+
+        .setting-item {
+            padding: 20px 0;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+
+        .setting-info h3 {
+            color: #333;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .setting-info p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        /* Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            width: 60px;
+            height: 30px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 30px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #667eea;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(30px);
+        }
+
+        /* Select Dropdown */
+        select {
+            padding: 10px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            background: white;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+
+        .btn-danger {
+            background: #ff4757;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #ff3838;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .btn-secondary:hover {
+            background: #f8f9ff;
+        }
+
+        /* Password Change Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            animation: slideDown 0.3s;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            color: #333;
+        }
+
+        .close {
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .close:hover {
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 15px;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .alert {
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert.show {
+            display: block;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        /* Danger Zone */
+        .danger-zone {
+            border: 2px solid #ff4757;
+            border-radius: 12px;
+            padding: 25px;
+            margin-top: 20px;
+        }
+
+        .danger-zone h3 {
+            color: #ff4757;
+            margin-bottom: 15px;
+        }
+
+        .danger-zone p {
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .setting-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .modal-content {
+                margin: 20% auto;
+                width: 95%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⚙️ Settings</h1>
+            <a href="/candidateDashboard" class="back-btn">← Back to Dashboard</a>
+        </div>
+
+        <div class="settings-container">
+            <!-- Notifications Settings -->
+            <div class="settings-card">
+                <div class="card-header">
+                    <span class="icon">🔔</span>
+                    <h2>Notifications</h2>
+                </div>
+
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <h3>Email Notifications</h3>
+                        <p>Receive updates about your applications via email</p>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="emailNotif" checked onchange="saveSettings()">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <h3>Interview Reminders</h3>
+                        <p>Get reminded before your scheduled interviews</p>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="interviewReminders" checked onchange="saveSettings()">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <h3>Application Status Updates</h3>
+                        <p>Notify when application status changes</p>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="statusUpdates" checked onchange="saveSettings()">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <h3>Feedback Notifications</h3>
+                        <p>Receive alerts when new feedback is available</p>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="feedbackNotif" checked onchange="saveSettings()">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Privacy Settings -->
+            <div class="settings-card">
+                <div class="card-header">
+                    <span class="icon">🔒</span>
+                    <h2>Privacy & Security</h2>
+                </div>
+
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <h3>Profile Visibility</h3>
+                        <p>Control who can see your profile</p>
+                    </div>
+                    <select id="profileVisibility" onchange="saveSettings()">
+                        <option value="public">Public</option>
+                        <option value="companies" selected>Companies Only</option>
+                        <option value="private">Private</option>
+                    </select>
+                </div>
+
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <h3>Two-Factor Authentication</h3>
+                        <p>Add an extra layer of security to your account</p>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="twoFactor" onchange="saveSettings()">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <h3>Change Password</h3>
+                        <p>Update your account password</p>
+                    </div>
+                    <button class="btn btn-secondary" onclick="openPasswordModal()">Change Password</button>
+                </div>
+            </div>
+
+            <!-- Preferences -->
+            <div class="settings-card">
+                <div class="card-header">
+                    <span class="icon">🎨</span>
+                    <h2>Preferences</h2>
+                </div>
+
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <h3>Language</h3>
+                        <p>Choose your preferred language</p>
+                    </div>
+                    <select id="language" onchange="saveSettings()">
+                        <option value="en" selected>English</option>
+                        <option value="hi">हिन्दी (Hindi)</option>
+                        <option value="es">Español</option>
+                        <option value="fr">Français</option>
+                    </select>
+                </div>
+
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <h3>Date Format</h3>
+                        <p>Choose how dates are displayed</p>
+                    </div>
+                    <select id="dateFormat" onchange="saveSettings()">
+                        <option value="MM/DD/YYYY" selected>MM/DD/YYYY</option>
+                        <option value="DD/MM/YYYY">DD/MM/YYYY</option>
+                        <option value="YYYY-MM-DD">YYYY-MM-DD</option>
+                    </select>
+                </div>
+
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <h3>Time Zone</h3>
+                        <p>Set your local time zone</p>
+                    </div>
+                    <select id="timezone" onchange="saveSettings()">
+                        <option value="Asia/Kolkata" selected>India (IST)</option>
+                        <option value="America/New_York">New York (EST)</option>
+                        <option value="Europe/London">London (GMT)</option>
+                        <option value="Asia/Tokyo">Tokyo (JST)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Account Management -->
+            <div class="settings-card">
+                <div class="card-header">
+                    <span class="icon">👤</span>
+                    <h2>Account Management</h2>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-secondary" onclick="exportData()">📥 Export My Data</button>
+                    <button class="btn btn-secondary" onclick="downloadResume()">📄 Download Resume</button>
+                </div>
+
+                <div class="danger-zone">
+                    <h3>⚠️ Danger Zone</h3>
+                    <p>Once you delete your account, there is no going back. Please be certain.</p>
+                    <button class="btn btn-danger" onclick="deleteAccount()">Delete Account</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Password Change Modal -->
+    <div id="passwordModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Change Password</h2>
+                <span class="close" onclick="closePasswordModal()">&times;</span>
+            </div>
+            
+            <div id="passwordAlert" class="alert"></div>
+
+            <form id="passwordForm" onsubmit="changePassword(event)">
+                <div class="form-group">
+                    <label>Current Password</label>
+                    <input type="password" id="currentPassword" required>
+                </div>
+                <div class="form-group">
+                    <label>New Password</label>
+                    <input type="password" id="newPassword" required minlength="6">
+                </div>
+                <div class="form-group">
+                    <label>Confirm New Password</label>
+                    <input type="password" id="confirmPassword" required minlength="6">
+                </div>
+                <div class="action-buttons">
+                    <button type="button" class="btn btn-secondary" onclick="closePasswordModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Update Password</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Load settings on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('candidateToken');
+            if (!token) {
+                alert('Please login first');
+                window.location.href = '/candidateLogin';
+                return;
+            }
+            loadSettings();
+        });
+
+        // Load saved settings
+        function loadSettings() {
+            // Load from localStorage or use defaults
+            const settings = JSON.parse(localStorage.getItem('candidateSettings') || '{}');
+            
+            document.getElementById('emailNotif').checked = settings.emailNotif !== false;
+            document.getElementById('interviewReminders').checked = settings.interviewReminders !== false;
+            document.getElementById('statusUpdates').checked = settings.statusUpdates !== false;
+            document.getElementById('feedbackNotif').checked = settings.feedbackNotif !== false;
+            document.getElementById('twoFactor').checked = settings.twoFactor === true;
+            
+            if (settings.profileVisibility) {
+                document.getElementById('profileVisibility').value = settings.profileVisibility;
+            }
+            if (settings.language) {
+                document.getElementById('language').value = settings.language;
+            }
+            if (settings.dateFormat) {
+                document.getElementById('dateFormat').value = settings.dateFormat;
+            }
+            if (settings.timezone) {
+                document.getElementById('timezone').value = settings.timezone;
+            }
+        }
+
+        // Save settings
+        function saveSettings() {
+            const settings = {
+                emailNotif: document.getElementById('emailNotif').checked,
+                interviewReminders: document.getElementById('interviewReminders').checked,
+                statusUpdates: document.getElementById('statusUpdates').checked,
+                feedbackNotif: document.getElementById('feedbackNotif').checked,
+                twoFactor: document.getElementById('twoFactor').checked,
+                profileVisibility: document.getElementById('profileVisibility').value,
+                language: document.getElementById('language').value,
+                dateFormat: document.getElementById('dateFormat').value,
+                timezone: document.getElementById('timezone').value
+            };
+
+            localStorage.setItem('candidateSettings', JSON.stringify(settings));
+            
+            // Show success message
+            const message = document.createElement('div');
+            message.style.cssText = 'position:fixed;top:20px;right:20px;background:#28a745;color:white;padding:15px 25px;border-radius:8px;z-index:9999;animation:slideIn 0.3s;';
+            message.textContent = '✓ Settings saved successfully';
+            document.body.appendChild(message);
+            
+            setTimeout(() => {
+                message.style.animation = 'fadeOut 0.3s';
+                setTimeout(() => message.remove(), 300);
+            }, 2000);
+        }
+
+        // Password modal functions
+        function openPasswordModal() {
+            document.getElementById('passwordModal').style.display = 'block';
+        }
+
+        function closePasswordModal() {
+            document.getElementById('passwordModal').style.display = 'none';
+            document.getElementById('passwordForm').reset();
+            document.getElementById('passwordAlert').classList.remove('show');
+        }
+
+        // Change password
+        async function changePassword(event) {
+            event.preventDefault();
+            
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const alert = document.getElementById('passwordAlert');
+
+            if (newPassword !== confirmPassword) {
+                alert.className = 'alert alert-error show';
+                alert.textContent = 'New passwords do not match!';
+                return;
+            }
+
+            try {
+                const token = localStorage.getItem('candidateToken');
+                const response = await fetch('/api/candidate/change-password', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ currentPassword, newPassword })
+                });
+
+                if (!response.ok) throw new Error('Failed to change password');
+
+                alert.className = 'alert alert-success show';
+                alert.textContent = 'Password changed successfully!';
+                
+                setTimeout(() => {
+                    closePasswordModal();
+                }, 2000);
+            } catch (error) {
+                alert.className = 'alert alert-error show';
+                alert.textContent = 'Failed to change password. Please try again.';
+            }
+        }
+
+        // Export data
+        function exportData() {
+            alert('Data export feature coming soon! You will receive an email with your data.');
+        }
+
+        // Download resume
+        function downloadResume() {
+            alert('Resume download feature coming soon!');
+        }
+
+        // Delete account
+        function deleteAccount() {
+            const confirmed = confirm('⚠️ WARNING: This action cannot be undone!\n\nAre you absolutely sure you want to delete your account?');
+            
+            if (confirmed) {
+                const doubleCheck = prompt('Type "DELETE" to confirm account deletion:');
+                
+                if (doubleCheck === 'DELETE') {
+                    alert('Account deletion feature coming soon. Please contact support@findmyinterview.com');
+                }
+            }
+        }
+    </script>
+</body>
+</html>

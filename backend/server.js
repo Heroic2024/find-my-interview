@@ -358,6 +358,66 @@ app.get("/api/interviews/for-feedback", authenticateCompany, async (req, res) =>
   }
 });
 
+// ------------------- Company Notes Routes -------------------
+
+// Save a note
+app.post("/api/notes", authenticateCompany, async (req, res) => {
+  try {
+    const companyId =
+      req.company.companyId || req.company.id || req.company.userId;
+    const { noteText } = req.body;
+
+    if (!noteText || !noteText.trim()) {
+      return res.status(400).json({ error: "noteText is required" });
+    }
+
+    const result = await db.saveCompanyNote(companyId, noteText.trim());
+    res.json({ message: "Note saved successfully", id: result.insertId });
+  } catch (error) {
+    console.error("❌ Error saving note:", error);
+    res.status(500).json({ error: "Failed to save note" });
+  }
+});
+
+// Get all notes for a company
+app.get("/api/notes", authenticateCompany, async (req, res) => {
+  try {
+    const companyId =
+      req.company.companyId || req.company.id || req.company.userId;
+    const notes = await db.getCompanyNotes(companyId);
+    res.json(notes);
+  } catch (error) {
+    console.error("❌ Error fetching notes:", error);
+    res.status(500).json({ error: "Failed to load notes" });
+  }
+});
+
+// Delete a specific note
+app.delete("/api/notes/:id", authenticateCompany, async (req, res) => {
+  try {
+    const companyId =
+      req.company.companyId || req.company.id || req.company.userId;
+    const noteId = parseInt(req.params.id, 10);
+
+    if (!noteId) {
+      return res.status(400).json({ error: "Invalid note ID" });
+    }
+
+    const result = await db.deleteCompanyNote(noteId, companyId);
+    if (result.affectedRows === 0) {
+      return res
+        .status(404)
+        .json({ error: "Note not found or not authorized to delete" });
+    }
+
+    res.json({ message: "Note deleted successfully" });
+  } catch (error) {
+    console.error("❌ Error deleting note:", error);
+    res.status(500).json({ error: "Failed to delete note" });
+  }
+});
+
+
 // Submit feedback
 app.post("/api/feedback", authenticateCompany, async (req, res) => {
   try {
@@ -497,6 +557,232 @@ app.get("/candidateLogin", (req, res) => {
 
 app.get("/candidateDashboard", (req, res) => {
   res.sendFile(path.join(PUBLIC_DIR, "candidate_dashboard.html"));
+});
+
+// Add this with your other route definitions
+app.get("/updateProfile", (req, res) => {
+  res.sendFile(path.join(PUBLIC_DIR, "update_profile.html"));
+});
+
+// Add these routes to your server.js
+
+// ==================== Serve New Pages ====================
+app.get("/viewApplications", (req, res) => {
+  res.sendFile(path.join(PUBLIC_DIR, "candidate_applications.html"));
+});
+
+app.get("/candidateSettings", (req, res) => {
+  res.sendFile(path.join(PUBLIC_DIR, "candidate_settings.html"));
+});
+
+app.get("/resumeManager", (req, res) => {
+  res.sendFile(path.join(PUBLIC_DIR, "resume_manager.html"));
+});
+
+// ==================== Applications API ====================
+
+// Get candidate's applications
+app.get("/api/candidate/applications", authenticateCandidate, async (req, res) => {
+  try {
+    const candidateId = req.candidate.userId;
+    const applications = await db.getCandidateApplications(candidateId);
+    res.json(applications);
+  } catch (err) {
+    console.error("❌ Error fetching applications:", err);
+    res.status(500).json({ error: "Failed to fetch applications" });
+  }
+});
+
+// Withdraw application
+app.patch("/api/candidate/applications/:id/withdraw", authenticateCandidate, async (req, res) => {
+  try {
+    const applicationId = req.params.id;
+    const candidateId = req.candidate.userId;
+    
+    await db.withdrawApplication(applicationId, candidateId);
+    res.json({ message: "Application withdrawn successfully" });
+  } catch (err) {
+    console.error("❌ Error withdrawing application:", err);
+    res.status(500).json({ error: "Failed to withdraw application" });
+  }
+});
+
+// ==================== Resume API ====================
+
+// Get resume data
+app.get("/api/candidate/resume", authenticateCandidate, async (req, res) => {
+  try {
+    const candidateId = req.candidate.userId;
+    const resumeData = await db.getCandidateResume(candidateId);
+    res.json(resumeData);
+  } catch (err) {
+    console.error("❌ Error fetching resume:", err);
+    res.status(500).json({ error: "Failed to fetch resume" });
+  }
+});
+
+// Upload new resume
+app.post("/api/candidate/resume/upload", authenticateCandidate, upload.single("resume"), async (req, res) => {
+  try {
+    const candidateId = req.candidate.userId;
+    const file = req.file;
+
+    if (!file) {
+      return res.status(400).json({ error: "No file uploaded" });
+    }
+
+    await db.uploadResume(candidateId, {
+      file_name: file.originalname,
+      file_path: file.path,
+      file_size: file.size
+    });
+
+    res.json({ message: "Resume uploaded successfully" });
+  } catch (err) {
+    console.error("❌ Error uploading resume:", err);
+    res.status(500).json({ error: "Failed to upload resume" });
+  }
+});
+
+// Download resume
+app.get("/api/candidate/resume/download", authenticateCandidate, async (req, res) => {
+  try {
+    const candidateId = req.candidate.userId;
+    const resumePath = await db.getCandidateResumePath(candidateId);
+    
+    if (!resumePath || !fs.existsSync(resumePath)) {
+      return res.status(404).json({ error: "Resume not found" });
+    }
+
+    res.download(resumePath);
+  } catch (err) {
+    console.error("❌ Error downloading resume:", err);
+    res.status(500).json({ error: "Failed to download resume" });
+  }
+});
+
+// View resume
+app.get("/api/candidate/resume/view", authenticateCandidate, async (req, res) => {
+  try {
+    const candidateId = req.candidate.userId;
+    const resumePath = await db.getCandidateResumePath(candidateId);
+    
+    if (!resumePath || !fs.existsSync(resumePath)) {
+      return res.status(404).json({ error: "Resume not found" });
+    }
+
+    res.sendFile(resumePath);
+  } catch (err) {
+    console.error("❌ Error viewing resume:", err);
+    res.status(500).json({ error: "Failed to view resume" });
+  }
+});
+
+// ==================== Password Change API ====================
+app.post("/api/candidate/change-password", authenticateCandidate, async (req, res) => {
+  try {
+    const candidateId = req.candidate.userId;
+    const { currentPassword, newPassword } = req.body;
+
+    const isValid = await db.verifyPassword(candidateId, currentPassword);
+    if (!isValid) {
+      return res.status(401).json({ error: "Current password is incorrect" });
+    }
+
+    const newPasswordHash = await bcrypt.hash(newPassword, 10);
+    await db.updatePassword(candidateId, newPasswordHash);
+
+    res.json({ message: "Password changed successfully" });
+  } catch (err) {
+    console.error("❌ Error changing password:", err);
+    res.status(500).json({ error: "Failed to change password" });
+  }
+});
+
+// ==================== Serve Skill Assessment Page ====================
+app.get("/skillAssessment", (req, res) => {
+  res.sendFile(path.join(PUBLIC_DIR, "skill_assessment.html"));
+});
+
+// ==================== Assessment API Routes ====================
+
+// Get all assessments with candidate's progress
+app.get("/api/assessments", authenticateCandidate, async (req, res) => {
+  try {
+    const candidateId = req.candidate.userId;
+    const assessments = await db.getAllAssessments(candidateId);
+    res.json(assessments);
+  } catch (err) {
+    console.error("❌ Error fetching assessments:", err);
+    res.status(500).json({ error: "Failed to fetch assessments" });
+  }
+});
+
+// Start an assessment (get questions)
+app.post("/api/assessments/:id/start", authenticateCandidate, async (req, res) => {
+  try {
+    const assessmentId = req.params.id;
+    const assessment = await db.getAssessmentWithQuestions(assessmentId);
+    res.json(assessment);
+  } catch (err) {
+    console.error("❌ Error starting assessment:", err);
+    res.status(500).json({ error: "Failed to start assessment" });
+  }
+});
+
+// Submit assessment
+app.post("/api/assessments/:id/submit", authenticateCandidate, async (req, res) => {
+  try {
+    const candidateId = req.candidate.userId;
+    const assessmentId = req.params.id;
+    const { answers, time_taken } = req.body;
+
+    const results = await db.submitAssessment(candidateId, assessmentId, answers, time_taken);
+    
+    // Check and award badges
+    await db.checkAndAwardBadges(candidateId);
+    
+    res.json(results);
+  } catch (err) {
+    console.error("❌ Error submitting assessment:", err);
+    res.status(500).json({ error: "Failed to submit assessment" });
+  }
+});
+
+// Get assessment stats
+app.get("/api/assessments/stats", authenticateCandidate, async (req, res) => {
+  try {
+    const candidateId = req.candidate.userId;
+    const stats = await db.getAssessmentStats(candidateId);
+    res.json(stats);
+  } catch (err) {
+    console.error("❌ Error fetching stats:", err);
+    res.status(500).json({ error: "Failed to fetch stats" });
+  }
+});
+
+// Get badges
+app.get("/api/assessments/badges", authenticateCandidate, async (req, res) => {
+  try {
+    const candidateId = req.candidate.userId;
+    const badges = await db.getCandidateBadges(candidateId);
+    res.json(badges);
+  } catch (err) {
+    console.error("❌ Error fetching badges:", err);
+    res.status(500).json({ error: "Failed to fetch badges" });
+  }
+});
+
+// Get recent results
+app.get("/api/assessments/recent-results", authenticateCandidate, async (req, res) => {
+  try {
+    const candidateId = req.candidate.userId;
+    const results = await db.getRecentResults(candidateId);
+    res.json(results);
+  } catch (err) {
+    console.error("❌ Error fetching recent results:", err);
+    res.status(500).json({ error: "Failed to fetch recent results" });
+  }
 });
 
 // Fallback route for unknown endpoints

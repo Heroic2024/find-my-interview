@@ -491,6 +491,9 @@
                     <button class="action-btn" onclick="updateProfile()">📝 Update Profile</button>
                     <button class="action-btn" onclick="viewApplications()">📄 View Applications</button>
                     <button class="action-btn" onclick="downloadResume()">⬇️ Download Resume</button>
+                    <button class="action-btn" onclick="window.location.href='/skillAssessment'">
+                        🎯 Take Skill Assessment
+                    </button>
                     <button class="action-btn" onclick="contactSupport()">💬 Contact Support</button>
                 </div>
             </div>
@@ -811,24 +814,20 @@
     
         // Quick actions
         function updateProfile() {
-            alert('Profile update feature coming soon!');
-        }
-    
-        function viewApplications() {
-            alert('Applications view coming soon!');
-        }
-    
-        function downloadResume() {
-            if (candidateData && candidateData.resume_file_name) {
-                alert('Resume download feature coming soon!');
-            } else {
-                alert('No resume uploaded yet');
-            }
-        }
-    
-        function contactSupport() {
-            alert('Support: support@findmyinterview.com');
-        }
+    window.location.href = '/updateProfile';
+}
+
+function viewApplications() {
+    window.location.href = '/viewApplications';
+}
+
+function downloadResume() {
+    window.location.href = '/resumeManager';
+}
+
+function contactSupport() {
+    window.location.href = '/candidateSettings';
+}
     
         function logout() {
             localStorage.removeItem('candidateToken');

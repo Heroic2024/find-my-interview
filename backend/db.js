@@ -385,7 +385,7 @@ async function getCandidateFeedback(candidateId) {
   return rows;
 }
 
-// Update candidate profile
+// Update the existing updateCandidateProfile function
 async function updateCandidateProfile(candidateId, updateData) {
   const allowedFields = [
     'first_name', 'last_name', 'phone', 'position',
@@ -406,6 +406,8 @@ async function updateCandidateProfile(candidateId, updateData) {
     throw new Error('No valid fields to update');
   }
   
+  // Add updated_at timestamp if you want to track when profile was last updated
+  updates.push('updated_at = CURRENT_TIMESTAMP');
   values.push(candidateId);
   
   const [result] = await pool.query(
@@ -415,7 +417,6 @@ async function updateCandidateProfile(candidateId, updateData) {
   
   return result;
 }
-
 // ==================== Update module.exports ====================
 // Add these to your existing module.exports:
 module.exports = { 
@@ -442,4 +443,371 @@ module.exports = {
   getCandidateFeedback,
   updateCandidateProfile
 };
+
+// Add these functions to your db.js
+
+// ==================== Applications Functions ====================
+
+async function getCandidateApplications(candidateId) {
+  const [rows] = await pool.query(`
+    SELECT 
+      i.id,
+      c.name as company_name,
+      i.position,
+      i.interview_date as applied_date,
+      i.status,
+      i.interview_location as location,
+      'Full-time' as job_type,
+      i.updated_at as last_updated
+    FROM interviews i
+    LEFT JOIN companies c ON i.company_id = c.id
+    WHERE i.candidate_id = ?
+    ORDER BY i.interview_date DESC
+  `, [candidateId]);
+  
+  // Add mock stages for demo
+  return rows.map(row => ({
+    ...row,
+    stages: [
+      { name: 'Applied', status: 'completed', date: row.applied_date },
+      { name: 'Screening', status: row.status === 'completed' ? 'completed' : 'current', date: null },
+      { name: 'Interview', status: row.status === 'completed' ? 'completed' : 'pending', date: row.status === 'interview' ? row.applied_date : null },
+      { name: 'Offer', status: 'pending', date: null }
+    ]
+  }));
+}
+
+async function withdrawApplication(applicationId, candidateId) {
+  const [result] = await pool.query(
+    'UPDATE interviews SET status = "canceled" WHERE id = ? AND candidate_id = ?',
+    [applicationId, candidateId]
+  );
+  return result;
+}
+
+// ==================== Resume Functions ====================
+
+// Add at top of db.js if not already there
+const fs = require('fs');
+
+// Replace the getCandidateResume function
+async function getCandidateResume(candidateId) {
+  // Try to get with created_at first, fallback without it
+  let query = 'SELECT resume_file_name, resume_file_path';
+  
+  // Check if created_at column exists
+  try {
+    const [columns] = await pool.query(
+      "SHOW COLUMNS FROM candidates LIKE 'created_at'"
+    );
+    if (columns.length > 0) {
+      query += ', created_at as uploaded_at';
+    }
+  } catch (err) {
+    console.warn('Could not check for created_at column');
+  }
+  
+  query += ' FROM candidates WHERE id = ?';
+  
+  const [rows] = await pool.query(query, [candidateId]);
+  
+  const current = rows[0] || null;
+  
+  // Calculate file size if file exists
+  let fileSize = 0;
+  if (current && current.resume_file_path) {
+    try {
+      if (fs.existsSync(current.resume_file_path)) {
+        const stats = fs.statSync(current.resume_file_path);
+        fileSize = stats.size;
+      }
+    } catch (err) {
+      console.warn('Could not get file size:', err.message);
+    }
+  }
+  
+  // For now, return empty history (you can implement resume_history table later)
+  return {
+    current: current ? {
+      resume_file_name: current.resume_file_name,
+      uploaded_at: current.uploaded_at || new Date(),
+      file_size: fileSize
+    } : null,
+    history: [],
+    stats: {
+      totalUploads: current ? 1 : 0,
+      applicationsUsed: 0
+    }
+  };
+}
+
+async function uploadResume(candidateId, fileData) {
+  const [result] = await pool.query(
+    'UPDATE candidates SET resume_file_name = ?, resume_file_path = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+    [fileData.file_name, fileData.file_path, candidateId]
+  );
+  return result;
+}
+
+async function getCandidateResumePath(candidateId) {
+  const [rows] = await pool.query(
+    'SELECT resume_file_path FROM candidates WHERE id = ?',
+    [candidateId]
+  );
+  return rows[0]?.resume_file_path || null;
+}
+
+// ==================== Password Functions ====================
+
+async function verifyPassword(candidateId, password) {
+  const [rows] = await pool.query(
+    'SELECT password FROM candidates WHERE id = ?',
+    [candidateId]
+  );
+  
+  if (rows.length === 0) return false;
+  
+  const storedHash = rows[0].password;
+  return await bcrypt.compare(password, storedHash);
+}
+
+async function updatePassword(candidateId, newPasswordHash) {
+  const [result] = await pool.query(
+    'UPDATE candidates SET password = ? WHERE id = ?',
+    [newPasswordHash, candidateId]
+  );
+  return result;
+}
+
+// ==================== Update module.exports ====================
+module.exports = {
+  testConnection,
+  insertCandidate,
+  verifyCandidate,
+  insertCompany,
+  verifyCompany,
+  query,
+  getAllCandidates,
+  getCompanyInterviews,
+  createInterview,
+  updateInterviewStatus,
+  saveCompanyNote,
+  getCompanyNotes,
+  deleteCompanyNote,
+  getInterviewsForFeedback,
+  submitFeedback,
+  getCompanyFeedback,
+  getFeedbackByCandidate,
+  getCandidateById,
+  getCandidateInterviews,
+  getCandidateFeedback,
+  updateCandidateProfile,
+  // NEW FUNCTIONS:
+  getCandidateApplications,
+  withdrawApplication,
+  getCandidateResume,
+  uploadResume,
+  getCandidateResumePath,
+  verifyPassword,
+  updatePassword,
+  getAllAssessments,
+  getAssessmentWithQuestions,
+  submitAssessment,
+  getAssessmentStats,
+  getCandidateBadges,
+  checkAndAwardBadges,
+  getRecentResults
+};
+
+// ==================== Assessment Functions ====================
+
+// Get all assessments with candidate's progress
+async function getAllAssessments(candidateId) {
+  const [rows] = await pool.query(`
+    SELECT 
+      a.*,
+      CASE WHEN car.id IS NOT NULL THEN 1 ELSE 0 END as completed,
+      COALESCE(car.score, 0) as score
+    FROM assessments a
+    LEFT JOIN candidate_assessment_results car ON a.id = car.assessment_id AND car.candidate_id = ?
+    WHERE a.is_active = 1
+    ORDER BY a.category, a.difficulty
+  `, [candidateId]);
+  return rows;
+}
+
+// Get assessment with questions
+async function getAssessmentWithQuestions(assessmentId) {
+  const [assessmentRows] = await pool.query(
+    'SELECT * FROM assessments WHERE id = ?',
+    [assessmentId]
+  );
+  
+  if (assessmentRows.length === 0) {
+    throw new Error('Assessment not found');
+  }
+  
+  const assessment = assessmentRows[0];
+  
+  const [questions] = await pool.query(`
+    SELECT id, question_text, option_a, option_b, option_c, option_d
+    FROM assessment_questions
+    WHERE assessment_id = ?
+    ORDER BY RAND()
+  `, [assessmentId]);
+  
+  // Format questions with options array
+  assessment.questions = questions.map(q => ({
+    id: q.id,
+    question_text: q.question_text,
+    options: [q.option_a, q.option_b, q.option_c, q.option_d]
+  }));
+  
+  return assessment;
+}
+
+// Submit assessment and calculate score
+async function submitAssessment(candidateId, assessmentId, answers, timeTaken) {
+  // Get correct answers
+  const [questions] = await pool.query(
+    'SELECT id, correct_answer, explanation FROM assessment_questions WHERE assessment_id = ? ORDER BY id',
+    [assessmentId]
+  );
+  
+  // Calculate score
+  let correct = 0;
+  const suggestions = [];
+  
+  questions.forEach((q, index) => {
+    if (answers[index] === q.correct_answer) {
+      correct++;
+    } else {
+      suggestions.push(`Review question ${index + 1}: ${q.explanation || 'Study this topic more'}`);
+    }
+  });
+  
+  const incorrect = questions.length - correct;
+  const score = Math.round((correct / questions.length) * 100);
+  
+  // Get passing score
+  const [assessmentInfo] = await pool.query(
+    'SELECT passing_score FROM assessments WHERE id = ?',
+    [assessmentId]
+  );
+  const passed = score >= assessmentInfo[0].passing_score;
+  
+  // Save result
+  await pool.query(`
+    INSERT INTO candidate_assessment_results 
+    (candidate_id, assessment_id, score, correct_answers, incorrect_answers, time_taken, passed, answers)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+  `, [candidateId, assessmentId, score, correct, incorrect, timeTaken, passed, JSON.stringify(answers)]);
+  
+  return {
+    score,
+    correct,
+    incorrect,
+    passed,
+    suggestions: suggestions.slice(0, 3) // Top 3 suggestions
+  };
+}
+
+// Get assessment stats
+async function getAssessmentStats(candidateId) {
+  const [stats] = await pool.query(`
+    SELECT 
+      COUNT(*) as total_completed,
+      ROUND(AVG(score), 0) as average_score,
+      COUNT(CASE WHEN passed = 1 THEN 1 END) as total_passed
+    FROM candidate_assessment_results
+    WHERE candidate_id = ?
+  `, [candidateId]);
+  
+  const [badgeCount] = await pool.query(
+    'SELECT COUNT(*) as badges_earned FROM candidate_badges WHERE candidate_id = ?',
+    [candidateId]
+  );
+  
+  return {
+    total_completed: stats[0].total_completed || 0,
+    average_score: stats[0].average_score || 0,
+    badges_earned: badgeCount[0].badges_earned || 0,
+    rank: null // Can implement ranking system later
+  };
+}
+
+// Get candidate badges
+async function getCandidateBadges(candidateId) {
+  const [allBadges] = await pool.query('SELECT * FROM badges');
+  const [earnedBadges] = await pool.query(
+    'SELECT badge_id FROM candidate_badges WHERE candidate_id = ?',
+    [candidateId]
+  );
+  
+  const earnedIds = earnedBadges.map(b => b.badge_id);
+  
+  return allBadges.map(badge => ({
+    ...badge,
+    earned: earnedIds.includes(badge.id)
+  }));
+}
+
+// Check and award badges
+async function checkAndAwardBadges(candidateId) {
+  const [results] = await pool.query(`
+    SELECT COUNT(*) as total, MAX(score) as max_score
+    FROM candidate_assessment_results
+    WHERE candidate_id = ?
+  `, [candidateId]);
+  
+  const total = results[0].total;
+  const maxScore = results[0].max_score;
+  
+  // Award "First Steps" badge
+  if (total >= 1) {
+    await pool.query(`
+      INSERT IGNORE INTO candidate_badges (candidate_id, badge_id)
+      SELECT ?, id FROM badges WHERE name = 'First Steps'
+    `, [candidateId]);
+  }
+  
+  // Award "Quick Learner" badge
+  if (maxScore >= 80) {
+    await pool.query(`
+      INSERT IGNORE INTO candidate_badges (candidate_id, badge_id)
+      SELECT ?, id FROM badges WHERE name = 'Quick Learner'
+    `, [candidateId]);
+  }
+  
+  // Award "Perfect Score" badge
+  if (maxScore >= 100) {
+    await pool.query(`
+      INSERT IGNORE INTO candidate_badges (candidate_id, badge_id)
+      SELECT ?, id FROM badges WHERE name = 'Perfect Score'
+    `, [candidateId]);
+  }
+  
+  // Award "Assessment Master" badge
+  if (total >= 10) {
+    await pool.query(`
+      INSERT IGNORE INTO candidate_badges (candidate_id, badge_id)
+      SELECT ?, id FROM badges WHERE name = 'Assessment Master'
+    `, [candidateId]);
+  }
+}
+
+// Get recent results
+async function getRecentResults(candidateId) {
+  const [rows] = await pool.query(`
+    SELECT 
+      car.*,
+      a.title as assessment_name
+    FROM candidate_assessment_results car
+    JOIN assessments a ON car.assessment_id = a.id
+    WHERE car.candidate_id = ?
+    ORDER BY car.completed_at DESC
+    LIMIT 10
+  `, [candidateId]);
+  return rows;
+}
 
