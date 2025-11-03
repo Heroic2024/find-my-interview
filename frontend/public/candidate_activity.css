@@ -5,6 +5,15 @@ body {
   margin: 0;
   padding: 0;
 }
+.gradient-bg {
+  background: linear-gradient(135deg, #0d47a1, #6e0808);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: "Segoe UI", sans-serif;
+  margin: 0;
+}
 
 header {
   background: #408ae4;

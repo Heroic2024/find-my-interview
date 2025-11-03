@@ -1,11 +1,12 @@
 /* General Layout */
 body {
     font-family: 'Segoe UI', Tahoma, sans-serif;
-    background: linear-gradient(135deg, #dbefff, #f7faff);
+     background: linear-gradient(135deg, #0d47a1, #6e0808);
     margin: 0;
     padding: 30px;
     color: #1a3d6d;
   }
+  
   
   /* Form Container */
   .form-container {

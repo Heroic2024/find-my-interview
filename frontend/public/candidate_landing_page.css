@@ -5,6 +5,15 @@
       background: linear-gradient(135deg, #a3c9f9 0%, #408ae4 100%);
       color: #333;
     }
+    .gradient-bg {
+      background: linear-gradient(135deg, #0d47a1, #6e0808);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: "Segoe UI", sans-serif;
+      margin: 0;
+    }
 
     /* --- NAVBAR --- */
     .navbar {

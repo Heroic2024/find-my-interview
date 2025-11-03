@@ -4,6 +4,7 @@ body {
     background: #E3F2FD; /* Light blue background */
     margin: 0;
     padding: 20px;
+    background: linear-gradient(135deg, #0d47a1, #6e0808);
   }
   
   .report-container {

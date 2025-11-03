@@ -1,6 +1,6 @@
 /* Background */
 .gradient-bg {
-  background: linear-gradient(135deg, #408ae4, #042670);
+  background: linear-gradient(135deg, #0d47a1, #6e0808);
   min-height: 100vh;
   display: flex;
   justify-content: center;

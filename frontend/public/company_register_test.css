@@ -12,6 +12,7 @@ body {
     align-items: flex-start; /* start content from top */
     padding: 2rem 0;
     overflow-y: auto; /* allow scrolling */
+    background: linear-gradient(135deg, #0d47a1, #6e0808);
 }
 /* Container */
 .container {

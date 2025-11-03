@@ -6,6 +6,7 @@ body {
     background-size: cover; /* makes it cover the entire area */
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     text-align: center;
+    background: linear-gradient(135deg, #0d47a1, #6e0808);
   }
   
   /* Container */

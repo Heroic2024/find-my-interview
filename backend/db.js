@@ -6,7 +6,7 @@ require('dotenv').config();
 const pool = mysql.createPool({
   host: process.env.DB_HOST || 'localhost',
   user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASS || 'Theo1000*',
+  password: process.env.DB_PASS || 'Admin',
   database: process.env.DB_NAME || 'recruitment_system'
 });
 
