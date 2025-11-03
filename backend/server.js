@@ -478,19 +478,27 @@ function generateToken(user) {
 
 // ==================== Candidate Authentication Middleware ====================
 function authenticateCandidate(req, res, next) {
-  const authHeader = req.headers['authorization'];
-  if (!authHeader) return res.status(401).json({ error: "No token provided" });
+   let token = null;
+  const authHeader = req.headers["authorization"];
 
-  const token = authHeader.split(' ')[1];
-  if (!token) return res.status(401).json({ error: "Invalid token" });
-
-  try {
-    const decoded = jwt.verify(token, JWT_SECRET);
-    req.candidate = decoded; // attach decoded candidate info to request
-    next();
-  } catch (err) {
-    return res.status(403).json({ error: "Token invalid or expired" });
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    token = authHeader.split(" ")[1];
   }
+
+  // ✅ If not found, check URL query (for ?token=...)
+  if (!token && req.query.token) {
+    token = req.query.token;
+  }
+
+  if (!token) {
+    return res.status(401).json({ error: "No token provided" });
+  }
+
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+    if (err) return res.status(403).json({ error: "Invalid token" });
+    req.candidate = decoded;
+    next();
+});
 }
 
 // ==================== Candidate Dashboard Routes ====================
@@ -651,6 +659,7 @@ app.get("/api/candidate/resume/download", authenticateCandidate, async (req, res
     const resumePath = await db.getCandidateResumePath(candidateId);
     
     if (!resumePath || !fs.existsSync(resumePath)) {
+      console.error("❌ Resume file does not exist at path:", resumePath);
       return res.status(404).json({ error: "Resume not found" });
     }
 
@@ -665,9 +674,11 @@ app.get("/api/candidate/resume/download", authenticateCandidate, async (req, res
 app.get("/api/candidate/resume/view", authenticateCandidate, async (req, res) => {
   try {
     const candidateId = req.candidate.userId;
+    console.log("Candidate ID:", candidateId);
     const resumePath = await db.getCandidateResumePath(candidateId);
-    
+
     if (!resumePath || !fs.existsSync(resumePath)) {
+      console.error("❌ Resume file does not exist at path:", resumePath);
       return res.status(404).json({ error: "Resume not found" });
     }
 
@@ -677,6 +688,33 @@ app.get("/api/candidate/resume/view", authenticateCandidate, async (req, res) =>
     res.status(500).json({ error: "Failed to view resume" });
   }
 });
+// ==================== TESTING RESUME PATH FOR VIEWING***** ====================
+app.get("/api/candidate/resume/view-url", authenticateCandidate, async (req, res) => {
+  try {
+    const candidateId = req.candidate.userId;
+    let resumePath = await db.getCandidateResumePath(candidateId);
+
+    if (!resumePath) {
+      console.error("❌ Resume path missing in DB");
+      return res.status(404).json({ error: "Resume not found" });
+    }
+
+    // ✅ Normalize path for Windows and convert backslashes to forward slashes
+    resumePath = path.resolve(resumePath);
+
+    if (!fs.existsSync(resumePath)) {
+      console.error("❌ Resume file does not exist at:", resumePath);
+      return res.status(404).json({ error: "Resume not found" });
+    }
+    // Generate a signed temporary token valid for 2 minutes
+    const token = generateToken({ candidateId }, "2m");
+    res.json({ url: `/api/candidate/resume/view?token=${token}` });
+  } catch (err) {
+    console.error("❌ Error generating view URL:", err);
+    res.status(500).json({ error: "Failed to generate view URL" });
+  }
+  });
+
 
 // ==================== Password Change API ====================
 app.post("/api/candidate/change-password", authenticateCandidate, async (req, res) => {

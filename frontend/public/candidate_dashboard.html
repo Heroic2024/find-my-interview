@@ -413,7 +413,7 @@
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <h1>📋 My Dashboard</h1>
+            <h1>My Dashboard</h1>
             <div class="user-info">
                 <span class="user-name" id="userName">Loading...</span>
                 <button class="logout-btn" onclick="logout()">Logout</button>
@@ -491,13 +491,13 @@
                 <!-- Quick Actions -->
                 <div class="quick-actions">
                     <h3 class="section-title">Quick Actions</h3>
-                    <button class="action-btn" onclick="updateProfile()">📝 Update Profile</button>
-                    <button class="action-btn" onclick="viewApplications()">📄 View Applications</button>
-                    <button class="action-btn" onclick="downloadResume()">⬇️ Download Resume</button>
+                    <button class="action-btn" onclick="updateProfile()">Update Profile</button>
+                    <button class="action-btn" onclick="viewApplications()">View Applications</button>
+                    <button class="action-btn" onclick="downloadResume()">⬇Download Resume</button>
                     <button class="action-btn" onclick="window.location.href='/skillAssessment'">
-                        🎯 Take Skill Assessment
+                        Take Skill Assessment
                     </button>
-                    <button class="action-btn" onclick="contactSupport()">💬 Contact Support</button>
+                    <button class="action-btn" onclick="contactSupport()">📞Contact Support</button>
                 </div>
             </div>
         </div>
@@ -834,7 +834,7 @@ function contactSupport() {
     
         function logout() {
             localStorage.removeItem('candidateToken');
-            window.location.href = '/candidateLogin';
+            window.location.href = 'login.html';
         }
     </script>
 </body>
