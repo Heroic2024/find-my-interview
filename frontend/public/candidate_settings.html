@@ -362,7 +362,7 @@
             <!-- Notifications Settings -->
             <div class="settings-card">
                 <div class="card-header">
-                    <span class="icon">🔔</span>
+                    <span class="icon"></span>
                     <h2>Notifications</h2>
                 </div>
 
@@ -414,7 +414,7 @@
             <!-- Privacy Settings -->
             <div class="settings-card">
                 <div class="card-header">
-                    <span class="icon">🔒</span>
+                    <span class="icon"></span>
                     <h2>Privacy & Security</h2>
                 </div>
 
@@ -453,7 +453,7 @@
             <!-- Preferences -->
             <div class="settings-card">
                 <div class="card-header">
-                    <span class="icon">🎨</span>
+                    <span class="icon"></span>
                     <h2>Preferences</h2>
                 </div>
 
@@ -504,12 +504,12 @@
                 </div>
 
                 <div class="action-buttons">
-                    <button class="btn btn-secondary" onclick="exportData()">📥 Export My Data</button>
-                    <button class="btn btn-secondary" onclick="downloadResume()">📄 Download Resume</button>
+                    <button class="btn btn-secondary" onclick="exportData()"> Export My Data</button>
+                    <button class="btn btn-secondary" onclick="downloadResume()">Download Resume</button>
                 </div>
 
                 <div class="danger-zone">
-                    <h3>⚠️ Danger Zone</h3>
+                    <h3>Danger Zone</h3>
                     <p>Once you delete your account, there is no going back. Please be certain.</p>
                     <button class="btn btn-danger" onclick="deleteAccount()">Delete Account</button>
                 </div>
@@ -676,7 +676,7 @@
 
         // Delete account
         function deleteAccount() {
-            const confirmed = confirm('⚠️ WARNING: This action cannot be undone!\n\nAre you absolutely sure you want to delete your account?');
+            const confirmed = confirm(' WARNING: This action cannot be undone!\n\nAre you absolutely sure you want to delete your account?');
             
             if (confirmed) {
                 const doubleCheck = prompt('Type "DELETE" to confirm account deletion:');

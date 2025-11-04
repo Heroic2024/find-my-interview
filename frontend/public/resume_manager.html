@@ -468,28 +468,28 @@
                     <h2 class="card-title">Resume Tips</h2>
                     <ul class="tips-list">
                         <li class="tip-item">
-                            <span class="tip-icon">✨</span>
+                            <span class="tip-icon"></span>
                             <div class="tip-content">
                                 <h4>Keep it Updated</h4>
                                 <p>Update your resume regularly with new skills and experiences</p>
                             </div>
                         </li>
                         <li class="tip-item">
-                            <span class="tip-icon">🎯</span>
+                            <span class="tip-icon"></span>
                             <div class="tip-content">
                                 <h4>Customize for Jobs</h4>
                                 <p>Tailor your resume for each position you apply to</p>
                             </div>
                         </li>
                         <li class="tip-item">
-                            <span class="tip-icon">📊</span>
+                            <span class="tip-icon"></span>
                             <div class="tip-content">
                                 <h4>Use Action Verbs</h4>
                                 <p>Start bullet points with strong action verbs</p>
                             </div>
                         </li>
                         <li class="tip-item">
-                            <span class="tip-icon">🔍</span>
+                            <span class="tip-icon"></span>
                             <div class="tip-content">
                                 <h4>Proofread Carefully</h4>
                                 <p>Check for spelling and grammar errors</p>
@@ -565,9 +565,9 @@
                         </div>
                     </div>
                     <div class="resume-actions">
-                        <button class="btn btn-white" onclick="downloadResume()">📥 Download</button>
-                        <button class="btn btn-white" onclick="viewResume()">👁️ Preview</button>
-                        <button class="btn btn-outline" onclick="replaceResume()">🔄 Replace</button>
+                        <button class="btn btn-white" onclick="downloadResume()"> Download</button>
+                        <button class="btn btn-white" onclick="viewResume()"> Preview</button>
+                        <button class="btn btn-outline" onclick="replaceResume()">Replace</button>
                     </div>
                 </div>
             `;
@@ -589,7 +589,7 @@
             container.innerHTML = history.map((resume, index) => `
                 <div class="resume-history-item">
                     <div class="history-header">
-                        <div class="history-name">📄 ${resume.file_name}</div>
+                        <div class="history-name"> ${resume.file_name}</div>
                         <div class="history-date">${formatDate(resume.uploaded_at)}</div>
                     </div>
                     <div class="history-actions">

@@ -351,7 +351,7 @@
 
     <!-- Schedule Interview Section -->
     <div id="schedule" class="content-section active">
-      <h2 style="margin-bottom: 20px; color: #333;">📝 Schedule New Interview</h2>
+      <h2 style="margin-bottom: 20px; color: #333;">Schedule New Interview</h2>
       
       <div id="scheduleAlert" class="alert"></div>
 
@@ -471,13 +471,13 @@
           </div>
         </div>
 
-        <button type="submit" class="btn btn-primary">📅 Schedule Interview</button>
+        <button type="submit" class="btn btn-primary"> Schedule Interview</button>
       </form>
     </div>
 
     <!-- Upcoming Interviews Section -->
     <div id="upcoming" class="content-section">
-      <h2 style="margin-bottom: 20px; color: #333;">📆 Upcoming Interviews</h2>
+      <h2 style="margin-bottom: 20px; color: #333;">Upcoming Interviews</h2>
       <div class="filter-section">
         <input type="date" id="upcomingDateFilter" placeholder="Filter by date">
         <select id="upcomingPositionFilter">
@@ -491,7 +491,7 @@
 
     <!-- Completed Interviews Section -->
     <div id="completed" class="content-section">
-      <h2 style="margin-bottom: 20px; color: #333;">✅ Completed Interviews</h2>
+      <h2 style="margin-bottom: 20px; color: #333;">Completed Interviews</h2>
       <div class="filter-section">
         <input type="text" id="completedSearchInput" placeholder="Search by candidate name...">
         <select id="completedPositionFilter">
@@ -505,7 +505,7 @@
 
     <!-- All Interviews Section -->
     <div id="all" class="content-section">
-      <h2 style="margin-bottom: 20px; color: #333;">📋 All Interviews</h2>
+      <h2 style="margin-bottom: 20px; color: #333;"> All Interviews</h2>
       <div class="filter-section">
         <input type="text" id="allSearchInput" placeholder="Search by candidate name...">
         <select id="allStatusFilter">
@@ -676,7 +676,7 @@
       const container = document.getElementById('upcomingInterviewsList');
       
       if (upcoming.length === 0) {
-        showEmptyState('upcomingInterviewsList', '📅 No upcoming interviews scheduled');
+        showEmptyState('upcomingInterviewsList', ' No upcoming interviews scheduled');
         return;
       }
 
@@ -689,7 +689,7 @@
       const container = document.getElementById('completedInterviewsList');
       
       if (completed.length === 0) {
-        showEmptyState('completedInterviewsList', '✅ No completed interviews yet');
+        showEmptyState('completedInterviewsList', ' No completed interviews yet');
         return;
       }
 
@@ -700,7 +700,7 @@
       const container = document.getElementById('allInterviewsList');
       
       if (allInterviews.length === 0) {
-        showEmptyState('allInterviewsList', '📋 No interviews found');
+        showEmptyState('allInterviewsList', ' No interviews found');
         return;
       }
 
@@ -738,7 +738,7 @@
 
           <div class="interview-details">
             <div class="detail-item">
-              <span class="detail-icon">📅</span>
+              <span class="detail-icon"></span>
               <div class="detail-content">
                 <div class="detail-label">Date</div>
                 <div class="detail-value">${formattedDate}</div>
@@ -746,7 +746,7 @@
             </div>
 
             <div class="detail-item">
-              <span class="detail-icon">🕐</span>
+              <span class="detail-icon"></span>
               <div class="detail-content">
                 <div class="detail-label">Time</div>
                 <div class="detail-value">${formattedTime}</div>
@@ -754,7 +754,7 @@
             </div>
 
             <div class="detail-item">
-              <span class="detail-icon">🎯</span>
+              <span class="detail-icon"></span>
               <div class="detail-content">
                 <div class="detail-label">Round</div>
                 <div class="detail-value">${interview.round}</div>
@@ -762,7 +762,7 @@
             </div>
 
             <div class="detail-item">
-              <span class="detail-icon">👥</span>
+              <span class="detail-icon"></span>
               <div class="detail-content">
                 <div class="detail-label">Interviewers</div>
                 <div class="detail-value">${interviewers}</div>
@@ -783,7 +783,7 @@
 
             ${interview.interview_location ? `
               <div class="detail-item">
-                <span class="detail-icon">📍</span>
+                <span class="detail-icon"></span>
                 <div class="detail-content">
                   <div class="detail-label">Location</div>
                   <div class="detail-value">${interview.interview_location}</div>
@@ -802,19 +802,19 @@
           <div class="interview-actions">
             ${interview.status === 'scheduled' ? `
               <button class="action-btn btn-success" onclick="updateStatus(${interview.id}, 'completed')">
-                ✅ Mark Completed
+                Mark Completed
               </button>
               <button class="action-btn btn-danger" onclick="updateStatus(${interview.id}, 'canceled')">
-                ❌ Cancel
+                Cancel
               </button>
             ` : ''}
             ${interview.status === 'canceled' ? `
               <button class="action-btn btn-primary" onclick="updateStatus(${interview.id}, 'scheduled')">
-                🔄 Reschedule
+                Reschedule
               </button>
             ` : ''}
             <button class="action-btn" style="background: #667eea; color: white;" onclick="viewInterviewDetails(${interview.id})">
-              👁️ View Details
+              View Details
             </button>
           </div>
         </div>

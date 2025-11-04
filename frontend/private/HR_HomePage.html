@@ -63,17 +63,17 @@
 
     <!-- Interview Manager Section -->
     <section class="manager-section" id="interviews">
-      <h2>📋 Interview Manager Dashboard</h2>
+      <h2>Interview Manager Dashboard</h2>
       <div class="action-buttons">
-        <button class="btn btn-primary" onclick="showFeedbackForm()">📝 Feedback Form</button>
-        <button class="btn btn-secondary" onclick="showScheduler()">📅 Interview Scheduler</button>
+        <button class="btn btn-primary" onclick="showFeedbackForm()">Feedback Form</button>
+        <button class="btn btn-secondary" onclick="showScheduler()">Interview Scheduler</button>
       </div>
       <p style="color: #666; margin-top: 10px;">Manage interview schedules, submit feedback, and track candidate progress through the hiring pipeline.</p>
     </section>
 
     <!-- Candidates Section -->
     <section class="candidates-section" id="candidates">
-      <h2>👥 Candidate/Applicants</h2>
+      <h2>Candidate/Applicants</h2>
       <p style="color: #666; margin-bottom: 20px;">Dynamic candidate list from the database - showing all applicants for your company</p>
       
       <div class="search-filter">
@@ -101,11 +101,11 @@
 
     <!-- Notes Section -->
     <section class="notes-section" id="notes">
-      <h2>📝 Dynamic Notes Section</h2>
+      <h2>Dynamic Notes Section</h2>
       <p style="color: #666; margin-bottom: 20px;">Company can type and make notes here or schedule on calendar</p>
       
       <textarea class="notes-input" id="noteInput" placeholder="Type your notes here..."></textarea>
-      <button class="btn btn-primary" onclick="saveNote()">💾 Save Note</button>
+      <button class="btn btn-primary" onclick="saveNote()">Save Note</button>
       
       <div class="notes-list" id="notesList">
         <!-- Notes will be dynamically added here -->
@@ -114,7 +114,7 @@
 
     <!-- Contact Section -->
     <section class="contact-section" id="contact">
-      <h2>📞 Contact Us</h2>
+      <h2>Contact Us</h2>
       <div class="contact-info">
         <div class="contact-item">
           <strong>Company Name</strong>
@@ -156,14 +156,14 @@
   <div id="candidateModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
-        <h2>📋 Candidate Details</h2>
+        <h2>Candidate Details</h2>
         <button class="close-modal" onclick="closeModal()">&times;</button>
       </div>
       <div class="modal-body" id="modalBody">
         <!-- Content will be dynamically inserted here -->
       </div>
       <div class="modal-footer">
-        <button class="btn btn-secondary" onclick="scheduleInterviewFromModal()">📅 Schedule Interview</button>
+        <button class="btn btn-secondary" onclick="scheduleInterviewFromModal()">Schedule Interview</button>
         <button class="btn btn-primary" onclick="closeModal()">Close</button>
       </div>
     </div>
