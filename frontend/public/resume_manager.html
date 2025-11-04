@@ -724,13 +724,46 @@
         }
 
         // View resume
-        function viewResume() {
-            if (!currentResume) {
-                showAlert('No resume available', 'error');
-                return;
-            }
-            window.open(`/api/candidate/resume/view`, '_blank');
+        async function viewResume() {
+            try {
+    const response = await fetch("/api/candidate/resume/view-url", {
+      headers: {
+        "Authorization": `Bearer ${localStorage.getItem("token")}`
+      }
+    });
+
+    // Log the raw response text before parsing (for debugging)
+    const rawText = await response.text();
+    console.log("🔍 Raw response from /view-url:", rawText);
+
+    if (!response.ok) {
+      showAlert("Failed to view resume", "error");
+      return;
+    }
+
+    // Try parsing only after confirming it's valid JSON
+    let data;
+    try {
+      data = JSON.parse(rawText);
+    } catch (err) {
+      console.error("❌ JSON parse failed:", err);
+      showAlert("Something went wrong (Invalid JSON)", "error");
+      return;
+    }
+
+    if (!data.url) {
+      showAlert("Invalid response from server", "error");
+      return;
+    }
+
+    // ✅ Open secure temp URL
+    window.open(data.url, "_blank");
+  } catch (err) {
+    console.error("❌ Error viewing resume:", err);
+    showAlert("Something went wrong", "error");
+  }
         }
+
 
         // Replace resume
         function replaceResume() {
