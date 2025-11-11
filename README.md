@@ -1,4 +1,4 @@
-# find-my-interview
+# HireHive
 
 A web app to streamline and organize the recruitment process for companies.
 
